@@ -1,0 +1,36 @@
+{
+	"name": "salesforce",
+	"$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+	"sourceRoot": "apps/salesforce/bundle",
+	"projectType": "library",
+	"generators": {},
+	"targets": {
+		"build": {
+			"executor": "nx:run-commands",
+			"outputs": ["{projectRoot}/bundle/componentpacks/main/dist"],
+			"options": {
+				"commands": [
+                    "uesio pack",
+					"npx tsc --noEmit --project ./tsconfig.lib.json"
+				],
+				"parallel": false,
+				"cwd": "apps/salesforce"
+			}
+		},
+		"watch": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "uesio pack -w",
+				"cwd": "apps/salesforce"
+			}
+		},
+		"lint": {
+			"executor": "@nx/linter:eslint",
+			"options": {
+				"lintFilePatterns": ["apps/salesforce/**/*.ts*"]
+			}
+		}
+	},
+	"tags": [],
+	"implicitDependencies": []
+}

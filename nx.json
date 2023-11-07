@@ -1,0 +1,36 @@
+{
+	"npmScope": "integrations",
+	"affected": {
+		"defaultBase": "main"
+	},
+	"tasksRunnerOptions": {
+		"default": {
+			"runner": "nx/tasks-runners/default",
+			"options": {
+				"cacheableOperations": ["lint", "build", "test"],
+				"parallel": 1,
+				"useDaemonProcess": false
+			}
+		}
+	},
+	"defaultProject": "salesforce",
+	"$schema": "./node_modules/nx/schemas/nx-schema.json",
+	"targetDefaults": {
+		"build": {
+			"dependsOn": ["^build"]
+		}
+	},
+	"namedInputs": {
+		"default": ["{projectRoot}/**/*", "sharedGlobals"],
+		"sharedGlobals": [
+			"{workspaceRoot}/workspace.json",
+			"{workspaceRoot}/tsconfig.base.json",
+			"{workspaceRoot}/tslint.json",
+			"{workspaceRoot}/nx.json"
+		],
+		"production": [
+			"default",
+			"!{projectRoot}/.eslintrc.json"
+		]
+	}
+}
