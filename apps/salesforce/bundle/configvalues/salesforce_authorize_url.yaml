@@ -1,0 +1,5 @@
+name: salesforce_authorize_url
+store: platform
+managedBy: site
+defaultValue: https://login.salesforce.com/services/oauth2/authorize
+public: true
