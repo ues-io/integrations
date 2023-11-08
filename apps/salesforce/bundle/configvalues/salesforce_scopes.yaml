@@ -1,5 +1,5 @@
 name: salesforce_scopes
+public: true
 store: platform
 managedBy: site
 defaultValue: refresh_token,api,offline_access,openid,profile,id,email,address,phone
-public: true
