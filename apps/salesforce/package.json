@@ -1,12 +1,13 @@
 {
-	"name": "uesio/salesforce",
+	"name": "salesforce",
 	"version": "0.0.1",
 	"description": "",
 	"scripts": {
 		"build": "uesio pack",
-		"lint": "prettier --check . && eslint bundle/**/*.ts* && tsc --noEmit",
-		"push": "uesio pack && uesio workspace deploy",
-		"pull": "uesio workspace retrieve",
+		"lint-fix": "prettier --write . && eslint --fix -- bundle/**/*.ts*",
+		"lint": "prettier --check . && eslint -- bundle/**/*.ts* && tsc --project ./tsconfig.json --noEmit",
+		"push": "uesio pack && uesio deploy",
+		"pull": "uesio retrieve",
 		"publish": "uesio bundle create"
 	},
 	"devDependencies": {

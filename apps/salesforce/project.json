@@ -10,8 +10,8 @@
 			"outputs": ["{projectRoot}/bundle/componentpacks/main/dist"],
 			"options": {
 				"commands": [
-                    "uesio pack",
-					"npx tsc --noEmit --project ./tsconfig.lib.json"
+					"uesio pack",
+					"npx tsc --noEmit --project ./tsconfig.json"
 				],
 				"parallel": false,
 				"cwd": "apps/salesforce"
@@ -27,7 +27,8 @@
 		"lint": {
 			"executor": "@nx/linter:eslint",
 			"options": {
-				"lintFilePatterns": ["apps/salesforce/**/*.ts*"]
+				"cwd": "apps/salesforce",
+				"lintFilePatterns": ["**/*.ts*"]
 			}
 		}
 	},

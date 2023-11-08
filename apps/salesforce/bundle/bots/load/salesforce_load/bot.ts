@@ -12,7 +12,7 @@ type SoqlResponse = {
 	records: Record<string, object>[]
 }
 
-export default function load(bot: LoadBotApi) {
+export default function salesforce_load(bot: LoadBotApi) {
 	const {
 		batchNumber = 0,
 		batchSize,

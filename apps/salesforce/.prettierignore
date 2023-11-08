@@ -1,6 +1,12 @@
+# Add files here to ignore them from prettier formatting
 
-/bundle/componentpacks/*/dist
+/coverage
+/.vscode
 package-lock.json
 package.json
-generated
+# Ignore prettier errors for generated files
 node_modules
+bundle/componentpacks/*/dist
+generated/@types/**
+package-lock.json
+package.json
