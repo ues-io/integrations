@@ -1,0 +1,4 @@
+name: task_count
+type: NUMBER
+label: Task Count
+columnname: task_count

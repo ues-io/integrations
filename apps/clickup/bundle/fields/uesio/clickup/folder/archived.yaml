@@ -1,0 +1,4 @@
+name: archived
+type: CHECKBOX
+label: Archived
+columnname: archived

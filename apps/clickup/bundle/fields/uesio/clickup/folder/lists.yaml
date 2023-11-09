@@ -1,0 +1,5 @@
+name: lists
+type: LIST
+label: Lists
+subtype: STRUCT
+columnname: lists

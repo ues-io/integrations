@@ -1,0 +1,8 @@
+name: folder
+type: EXTERNAL
+label: Folder
+pluralLabel: Folders
+tablename: folder
+integration: clickup
+loadBot: uesio/clickup.clickup_folders_load
+saveBot: uesio/clickup.clickup_folders_save
