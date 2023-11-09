@@ -25,19 +25,29 @@ jobs:
           wget -q https://docs.ues.io/site/files/uesio/docs/v1.1.2/clilinux
           chmod +x clilinux
           sudo ln -s $PWD/clilinux /usr/local/bin/uesio
-      - name: Find apps that were modified
-        id: changed-files
-        uses: tj-actions/changed-files@v40
-        with:
-          dir_names: true
-          files: |
-            apps/**/*
-      - name: Build and lint each modified app
+      - name: npm install
+        shell: bash
+        run: npm ci
+      # - name: Find apps that were modified
+      #   id: changed-files
+      #   uses: tj-actions/changed-files@v40
+      #   with:
+      #     dir_names: true
+      #     files: |
+      #       apps/**/*
+      # - name: Build and lint each modified app
+      #   run: |
+      #     for dir in ${{ steps.changed-files.outputs.all_changed_files }}; do
+      #       echo "$dir was changed"
+      #       cd $dir
+      #       npm ci
+      #       npm run lint
+      #       # uesio pack
+      #     done
+      - name: Build and lint all apps
         run: |
-          for dir in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            echo "$dir was changed"
-            cd $dir
-            npm ci
-            npm run lint
-            # uesio pack
-          done
+          npm run prettier-check
+          npm run lint-all
+          npm run build-all
+
+
