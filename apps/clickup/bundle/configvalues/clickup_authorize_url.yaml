@@ -1,0 +1,5 @@
+name: salesforce_authorize_url
+public: true
+store: platform
+managedBy: site
+defaultValue: https://app.clickup.com/api

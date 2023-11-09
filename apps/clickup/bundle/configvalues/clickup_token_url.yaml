@@ -1,0 +1,5 @@
+name: clickup_token_url
+public: true
+store: platform
+managedBy: site
+defaultValue: https://api.clickup.com/api/v2/oauth/token

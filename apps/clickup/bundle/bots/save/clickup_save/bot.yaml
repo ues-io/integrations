@@ -1,0 +1,3 @@
+name: clickup_save
+type: SAVE
+dialect: TYPESCRIPT
