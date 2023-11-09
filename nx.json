@@ -28,9 +28,6 @@
 			"{workspaceRoot}/tslint.json",
 			"{workspaceRoot}/nx.json"
 		],
-		"production": [
-			"default",
-			"!{projectRoot}/.eslintrc.json"
-		]
+		"production": ["default", "!{projectRoot}/.eslintrc.json"]
 	}
 }

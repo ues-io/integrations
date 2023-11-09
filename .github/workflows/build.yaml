@@ -49,5 +49,3 @@ jobs:
           npm run prettier-check
           npm run lint-all
           npm run build-all
-
-
