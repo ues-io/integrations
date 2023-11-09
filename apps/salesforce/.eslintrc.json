@@ -1,6 +1,6 @@
 {
 	"extends": "../../.eslintrc.json",
-	"ignorePatterns": ["!**/*", "bundle/componentpacks/*/*.js*"],
+	"ignorePatterns": ["bundle/componentpacks/*/*.js*"],
 	"rules": {},
 	"overrides": [
 		{

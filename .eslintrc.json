@@ -1,6 +1,5 @@
 {
 	"root": true,
-	"ignorePatterns": ["**/*"],
 	"plugins": ["@nx", "react-hooks"],
 	"overrides": [
 		{

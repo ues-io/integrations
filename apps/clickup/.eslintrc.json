@@ -1,12 +1,12 @@
 {
 	"extends": "../../.eslintrc.json",
-	"ignorePatterns": ["!**/*", "bundle/componentpacks/*/*.js*"],
+	"ignorePatterns": ["bundle/componentpacks/*/*.js*"],
 	"rules": {},
 	"overrides": [
 		{
 			"files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
 			"parserOptions": {
-				"project": ["apps/salesforce/tsconfig.*?.json"]
+				"project": ["apps/clickup/tsconfig.*?.json"]
 			},
 			"rules": {}
 		},
