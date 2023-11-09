@@ -1,6 +1,6 @@
 {
 	"name": "clickup",
-	"$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
 	"sourceRoot": "apps/clickup/bundle",
 	"projectType": "library",
 	"generators": {},
@@ -10,8 +10,8 @@
 			"outputs": ["{projectRoot}/bundle/componentpacks/main/dist"],
 			"options": {
 				"commands": [
-                    "uesio pack",
-					"npx tsc --noEmit --project ./tsconfig.lib.json"
+					"uesio pack",
+					"npx tsc --noEmit --project ./tsconfig.json"
 				],
 				"parallel": false,
 				"cwd": "apps/clickup"
@@ -27,7 +27,8 @@
 		"lint": {
 			"executor": "@nx/linter:eslint",
 			"options": {
-				"lintFilePatterns": ["apps/clickup/**/*.ts*"]
+				"cwd": "apps/clickup",
+				"lintFilePatterns": ["**/*.ts*"]
 			}
 		}
 	},

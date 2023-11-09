@@ -1,5 +1,5 @@
 name: salesforce_token_url
+public: true
 store: platform
 managedBy: site
 defaultValue: https://login.salesforce.com/services/oauth2/token
-public: true

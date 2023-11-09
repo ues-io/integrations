@@ -1,0 +1,80 @@
+{
+	"root": true,
+	"plugins": ["@nx", "react-hooks"],
+	"overrides": [
+		{
+			"files": ["*.ts", "*.tsx"],
+			"extends": ["plugin:@nx/typescript"],
+			"rules": {}
+		},
+		{
+			"files": ["*.js", "*.jsx"],
+			"extends": ["plugin:@nx/javascript"],
+			"rules": {}
+		},
+		{
+			"files": ["*.spec.ts", "*.spec.tsx"],
+			"env": {
+				"jest": true,
+				"browser": true
+			}
+		},
+		{
+			"files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+			"env": {
+				"browser": true
+			},
+			"plugins": ["react"],
+			"rules": {
+				"array-callback-return": "error",
+				"dot-notation": "error",
+				"prefer-arrow-callback": "error",
+				"arrow-body-style": "error",
+				"no-undef": "error",
+				"no-nested-ternary": "error",
+				"no-unneeded-ternary": "error",
+				"object-shorthand": "error",
+				"no-duplicate-imports": "error",
+				"eqeqeq": "error",
+				"radix": "error",
+				"no-new-wrappers": "error",
+				"react/jsx-key": "error",
+				"react/self-closing-comp": [
+					"error",
+					{
+						"component": true,
+						"html": true
+					}
+				],
+				"react/jsx-closing-bracket-location": "error",
+				"react-hooks/rules-of-hooks": "error",
+				"react-hooks/exhaustive-deps": "warn",
+				"@typescript-eslint/naming-convention": [
+					"error",
+					{
+						"selector": "variable",
+						"format": ["camelCase", "PascalCase", "UPPER_CASE"]
+					}
+				],
+				"@typescript-eslint/no-explicit-any": "error",
+				"@typescript-eslint/no-unused-vars": [
+					"error",
+					{ "ignoreRestSiblings": true }
+				],
+				"@nx/enforce-module-boundaries": [
+					"error",
+					{
+						"enforceBuildableLibDependency": true,
+						"allow": [],
+						"depConstraints": [
+							{
+								"sourceTag": "*",
+								"onlyDependOnLibsWithTags": ["*"]
+							}
+						]
+					}
+				]
+			}
+		}
+	]
+}

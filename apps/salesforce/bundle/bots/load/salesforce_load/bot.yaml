@@ -1,0 +1,3 @@
+name: salesforce_load
+type: LOAD
+dialect: TYPESCRIPT

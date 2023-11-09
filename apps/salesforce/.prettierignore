@@ -6,8 +6,7 @@ package-lock.json
 package.json
 # Ignore prettier errors for generated files
 node_modules
-**/node_modules/**
-apps/*/bundle/componentpacks/*/dist
-apps/*/generated/@types/**
-apps/*/package-lock.json
-apps/*/package.json
+bundle/componentpacks/*/dist
+generated/@types/**
+package-lock.json
+package.json

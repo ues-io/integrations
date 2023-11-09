@@ -2,4 +2,4 @@ name: salesforce_authorize_url
 public: true
 store: platform
 managedBy: site
-defaultValue: https://login.salesforce.com/services/oauth2/authorize
+defaultValue: https://app.clickup.com/api

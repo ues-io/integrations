@@ -25,7 +25,7 @@ type CompositeResponse = {
 	compositeResponse: SubrequestResult[]
 }
 
-export default function save(bot: SaveBotApi) {
+export default function salesforce_save(bot: SaveBotApi) {
 	const { collectionMetadata } = bot.saveRequest
 	const servicesPath = `/services/data/v59.0`
 	const sobjectPath = `${servicesPath}/sobjects/${collectionMetadata.externalName}`
