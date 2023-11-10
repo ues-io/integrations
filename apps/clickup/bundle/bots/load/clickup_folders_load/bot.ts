@@ -15,12 +15,11 @@ type FoldersResponse = {
 }
 
 export default function clickup_folders_load(bot: LoadBotApi) {
-	const spaceID = bot.getConfigValue("default_clickup_space_id")
+	const spaceID = bot.getCredentials().defaultSpaceId
 	if (!spaceID) {
-		bot.addError(
+		throw new Error(
 			"Default Clickup Space ID Config Value must be set. Please check your Site / Workspace settings."
 		)
-		return
 	}
 
 	const { conditions } = bot.loadRequest
@@ -32,6 +31,8 @@ export default function clickup_folders_load(bot: LoadBotApi) {
 			.getBaseURL()}/space/${spaceID}/folder?archived=false`
 	})
 
+	bot.log.info("result", result.body)
+	bot.log.info("result code: " + result.code + ", status: " + result.status)
 	if (result.code === 200) {
 		const folderFilter = (folder: Folder) => {
 			if (!conditions || !conditions.length) return true
