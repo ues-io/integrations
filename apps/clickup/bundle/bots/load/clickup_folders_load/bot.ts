@@ -23,12 +23,18 @@ export default function clickup_folders_load(bot: LoadBotApi) {
 	}
 
 	const { conditions } = bot.loadRequest
+	const url = `${bot
+		.getIntegration()
+		.getBaseURL()}/space/${spaceID}/folder?archived=false`
+
+	bot.log.info("GET " + url)
 
 	const result = bot.http.request({
 		method: "GET",
-		url: `${bot
-			.getIntegration()
-			.getBaseURL()}/space/${spaceID}/folder?archived=false`
+		url,
+		headers: {
+			"Content-Type": "application/json"
+		}
 	})
 
 	bot.log.info("result", result.body)

@@ -2,4 +2,4 @@ name: clickup
 type: clickup
 authentication: OAUTH2_AUTHORIZATION_CODE
 credentials: clickup_oauth
-baseUrl: https://api.clickup.com/v2
+baseUrl: https://api.clickup.com/api/v2
