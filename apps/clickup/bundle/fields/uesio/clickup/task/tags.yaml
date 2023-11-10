@@ -1,0 +1,5 @@
+name: tags
+type: LIST
+label: Tags
+subtype: TEXT
+columnname: tags

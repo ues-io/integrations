@@ -1,0 +1,5 @@
+name: checklists
+type: LIST
+label: Checklist
+subtype: TEXT
+columnname: checklists

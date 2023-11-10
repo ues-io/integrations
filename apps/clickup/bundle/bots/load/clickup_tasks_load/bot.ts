@@ -11,10 +11,13 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 			"Default Clickup Space ID Config Value must be set. Please check your Site / Workspace settings."
 		)
 	}
-	const { conditions, collectionMetadata } = bot.loadRequest
+	const { conditions, collectionMetadata, collection } = bot.loadRequest
 	// Build maps for quickly converting to/from Uesio/external field names
 	const uesioFieldsByExternalName = {
-		id: "uesio/core.id"
+		id: "uesio/core.id",
+		date_created: "uesio/core.created_at",
+		date_updated: "uesio/core.updated_at",
+		list_id: `${collection}.list->id`
 	} as Record<string, string>
 	Object.entries(collectionMetadata.getAllFieldMetadata()).forEach(
 		([uesioFieldName, fieldMetadata]) => {
@@ -49,10 +52,55 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 			},
 			{}
 		)
+	// List id must be provided by conditions
+	let listId
+	const qs = new URLSearchParams()
+	const buildQueryStringConditions = () => {
+		if (!conditions || !conditions.length) return
+		conditions.forEach((condition) => {
+			const { field } = condition
+			if (!field) return true
+			const externalFieldName = externalFieldsByUesioName[field]
+			if (!externalFieldName) return
+			// TODO: For now we assume all Conditions are of type fieldValue
+			// Special case: "list->id", use this as the list id
+			if (externalFieldName === "list_id") {
+				listId = condition.value
+				return
+			}
+			switch (condition.operator) {
+				case "GT":
+				case "GTE":
+					qs.set(`${externalFieldName}_gt`, `${condition.value}`)
+					break
+				case "LT":
+				case "LTE":
+					qs.set(`${externalFieldName}_lt`, `${condition.value}`)
+					break
+				case "IN":
+					;(condition.values || []).forEach((value) => {
+						qs.append(`${externalFieldName}[]`, `${value}`)
+					})
+					break
+				default:
+					qs.append(externalFieldName, `${condition.value}`)
+			}
+		})
+	}
+	buildQueryStringConditions()
+	const queryString = qs.toString()
+
+	if (!listId) {
+		throw new Error(
+			"Clickup Tasks Load Bot requires a list id condition to be set"
+		)
+	}
 
 	const url = `${bot
 		.getIntegration()
-		.getBaseURL()}/space/${spaceID}/list/${listId}/task?archived=false&include_markdown_description=true&page=0&order_by=string&reverse=true&subtasks=true&statuses=string&include_closed=true&assignees=string&tags=string&due_date_gt=0&due_date_lt=0&date_created_gt=0&date_created_lt=0&date_updated_gt=0&date_updated_lt=0&date_done_gt=0&date_done_lt=0&custom_fields=string'`
+		.getBaseURL()}/space/${spaceID}/list/${listId}/task${
+		queryString.length ? "?" + queryString : ""
+	}`
 
 	const result = bot.http.request({
 		method: "GET",
@@ -63,34 +111,10 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 	})
 
 	if (result.code === 200) {
-		const filter = (item: Record<string, unknown>) => {
-			if (!conditions || !conditions.length) return true
-			return conditions.every((condition) => {
-				const { field } = condition
-				if (!field) return true
-				const externalFieldName = externalFieldsByUesioName[field]
-				// TODO: For now we assume all Conditions are of type fieldValue
-				const fieldValue = item[externalFieldName]
-				switch (condition.operator) {
-					case "NOT_EQ":
-						return fieldValue !== condition.value
-					case "GT":
-						return fieldValue ?? 0 > (condition.value ?? 0)
-					case "LT":
-						return fieldValue ?? 0 < (condition.value ?? 0)
-					case "LTE":
-						return fieldValue ?? 0 <= (condition.value ?? 0)
-					case "GTE":
-						return fieldValue ?? 0 <= (condition.value ?? 0)
-					default:
-						return fieldValue === condition.value
-				}
-			})
-		}
-		;(result.body as TasksResponse).tasks.filter(filter).forEach((item) => {
+		;(result.body as TasksResponse).tasks.forEach((item) => {
 			bot.addRecord(getUesioItemFromExternalRecord(item))
 		})
 	} else {
-		bot.addError("failed to fetch folders: " + result.status)
+		bot.addError("failed to fetch Tasks: " + result.status)
 	}
 }

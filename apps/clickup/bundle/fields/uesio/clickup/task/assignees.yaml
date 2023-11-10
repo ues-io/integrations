@@ -1,0 +1,5 @@
+name: assignees
+type: LIST
+label: Assignees
+subtype: TEXT
+columnname: assignees

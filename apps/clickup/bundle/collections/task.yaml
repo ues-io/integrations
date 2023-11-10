@@ -1,0 +1,9 @@
+name: task
+type: EXTERNAL
+label: Task
+pluralLabel: Tasks
+nameField: name
+tablename: task
+integration: clickup
+loadBot: clickup_tasks_load
+saveBot: clickup_tasks_save

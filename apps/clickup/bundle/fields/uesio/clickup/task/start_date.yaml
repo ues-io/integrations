@@ -1,0 +1,5 @@
+name: start_date
+type: TIMESTAMP
+label: Start Date
+required: true
+columnname: start_date

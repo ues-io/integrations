@@ -1,0 +1,5 @@
+name: priority
+type: TEXT
+label: Priority
+required: true
+columnname: priority

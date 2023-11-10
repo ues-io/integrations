@@ -1,0 +1,7 @@
+name: list
+type: STRUCT
+label: List
+subfields:
+  - name: id
+    label: List Id
+    type: TEXT

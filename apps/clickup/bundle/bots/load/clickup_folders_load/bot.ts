@@ -14,7 +14,7 @@ export default function clickup_folders_load(bot: LoadBotApi) {
 	const { conditions, collectionMetadata } = bot.loadRequest
 	// Build maps for quickly converting to/from Uesio/external field names
 	const uesioFieldsByExternalName = {
-		id: "uesio/core.id"
+		id: "uesio/core.id",
 	} as Record<string, string>
 	Object.entries(collectionMetadata.getAllFieldMetadata()).forEach(
 		([uesioFieldName, fieldMetadata]) => {
@@ -58,8 +58,8 @@ export default function clickup_folders_load(bot: LoadBotApi) {
 		method: "GET",
 		url,
 		headers: {
-			"Content-Type": "application/json"
-		}
+			"Content-Type": "application/json",
+		},
 	})
 
 	if (result.code === 200) {
