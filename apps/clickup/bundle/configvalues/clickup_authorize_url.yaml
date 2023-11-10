@@ -1,4 +1,4 @@
-name: salesforce_authorize_url
+name: clickup_authorize_url
 public: true
 store: platform
 managedBy: site

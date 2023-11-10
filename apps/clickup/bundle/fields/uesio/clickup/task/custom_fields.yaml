@@ -1,0 +1,29 @@
+name: custom_fields
+type: STRUCT
+label: List
+subfields:
+  - name: id
+    label: Field Id
+    type: TEXT
+  - name: name
+    label: Field Name
+    type: TEXT
+  - name: value
+    label: Field Value
+    type: TEXT
+  - name: type_config
+    label: Type Config
+    type: STRUCT
+    subfields:
+      - name: options
+        label: Options
+        type: LIST
+        subtype: STRUCT
+        subfields:
+          - name: name
+            label: Option Name
+            type: TEXT
+          - name: orderindex
+            label: Option Order Index
+            type: NUMBER
+columnname: custom_fields

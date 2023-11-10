@@ -1,0 +1,4 @@
+name: markdown_description
+type: LONGTEXT
+label: Markdown Description
+columnname: markdown_description

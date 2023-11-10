@@ -1,3 +1,3 @@
-name: clickup_save
+name: clickup_folders_save
 type: SAVE
 dialect: TYPESCRIPT

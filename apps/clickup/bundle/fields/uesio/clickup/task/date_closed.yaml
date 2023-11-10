@@ -1,0 +1,5 @@
+name: date_closed
+type: TIMESTAMP
+label: Date Closed
+required: true
+columnname: date_closed
