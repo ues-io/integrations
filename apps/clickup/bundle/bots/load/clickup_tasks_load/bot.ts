@@ -5,20 +5,17 @@ type TasksResponse = {
 }
 
 export default function clickup_tasks_load(bot: LoadBotApi) {
-	const spaceID = bot.getCredentials().defaultSpaceId
-	if (!spaceID) {
-		throw new Error(
-			"Default Clickup Space ID Config Value must be set. Please check your Site / Workspace settings."
-		)
-	}
 	const { conditions, collectionMetadata, collection } = bot.loadRequest
+	const namespace = collection.split(".")[0]
 	// Build maps for quickly converting to/from Uesio/external field names
 	const uesioFieldsByExternalName = {
 		id: "uesio/core.id",
 		date_created: "uesio/core.created_at",
 		date_updated: "uesio/core.updated_at",
-		list_id: `${collection}.list->id`
+		list_id: `${namespace}.list->id`
 	} as Record<string, string>
+	bot.log.info("collection name", collection)
+	bot.log.info("conditions", conditions)
 	Object.entries(collectionMetadata.getAllFieldMetadata()).forEach(
 		([uesioFieldName, fieldMetadata]) => {
 			// Only expose fields that have a defined external field name
@@ -54,13 +51,20 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 		)
 	// List id must be provided by conditions
 	let listId
-	const queryParams = [] as string[]
+	const queryParams = ["archived=false"] as string[]
 	const buildQueryStringConditions = () => {
 		if (!conditions || !conditions.length) return
 		conditions.forEach((condition) => {
 			const { field, value } = condition
 			if (!field) return true
+
 			const externalFieldName = externalFieldsByUesioName[field]
+			bot.log.info(
+				"got condition on field: " +
+					field +
+					", external name: " +
+					externalFieldName
+			)
 			if (!externalFieldName) return
 			// TODO: For now we assume all Conditions are of type fieldValue
 			// Special case: "list->id", use this as the list id
@@ -103,11 +107,11 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 		)
 	}
 
-	const url = `${bot
-		.getIntegration()
-		.getBaseURL()}/space/${spaceID}/list/${listId}/task${
+	const url = `${bot.getIntegration().getBaseURL()}/list/${listId}/task${
 		queryParams.length ? "?" + queryParams.join("&") : ""
 	}`
+
+	bot.log.info("URL is", url)
 
 	const result = bot.http.request({
 		method: "GET",
@@ -122,6 +126,14 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 			bot.addRecord(getUesioItemFromExternalRecord(item))
 		})
 	} else {
+		bot.log.error(
+			"result",
+			result.code +
+				", " +
+				JSON.stringify(result.body) +
+				", status: " +
+				result.status
+		)
 		bot.addError("failed to fetch Tasks: " + result.status)
 	}
 }

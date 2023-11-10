@@ -14,3 +14,4 @@ subfields:
   - name: orderindex
     label: Order Index
     type: NUMBER
+columnname: status
