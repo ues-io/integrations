@@ -2,7 +2,7 @@ name: folder
 type: EXTERNAL
 label: Folder
 pluralLabel: Folders
-nameField: uesio/clickup.name
+nameField: name
 tablename: folder
 integration: clickup
 loadBot: clickup_folders_load
