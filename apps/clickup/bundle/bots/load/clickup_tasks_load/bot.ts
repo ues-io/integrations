@@ -54,11 +54,11 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 		)
 	// List id must be provided by conditions
 	let listId
-	const qs = new URLSearchParams()
+	const queryParams = [] as string[]
 	const buildQueryStringConditions = () => {
 		if (!conditions || !conditions.length) return
 		conditions.forEach((condition) => {
-			const { field } = condition
+			const { field, value } = condition
 			if (!field) return true
 			const externalFieldName = externalFieldsByUesioName[field]
 			if (!externalFieldName) return
@@ -68,27 +68,34 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 				listId = condition.value
 				return
 			}
+			if (value === null || value === undefined) return
+			const encodedValue = encodeURIComponent(value as string)
 			switch (condition.operator) {
 				case "GT":
 				case "GTE":
-					qs.set(`${externalFieldName}_gt`, `${condition.value}`)
+					queryParams.push(`${externalFieldName}_gt=${encodedValue}`)
 					break
 				case "LT":
 				case "LTE":
-					qs.set(`${externalFieldName}_lt`, `${condition.value}`)
+					queryParams.push(`${externalFieldName}_lt=${encodedValue}`)
 					break
 				case "IN":
-					;(condition.values || []).forEach((value) => {
-						qs.append(`${externalFieldName}[]`, `${value}`)
-					})
+					;(condition.values || [])
+						.filter((v) => !!v)
+						.forEach((value) => {
+							queryParams.push(
+								`${externalFieldName}[]=${encodeURIComponent(
+									value as string
+								)}`
+							)
+						})
 					break
 				default:
-					qs.append(externalFieldName, `${condition.value}`)
+					queryParams.push(`${externalFieldName}=${encodedValue}`)
 			}
 		})
 	}
 	buildQueryStringConditions()
-	const queryString = qs.toString()
 
 	if (!listId) {
 		throw new Error(
@@ -99,7 +106,7 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 	const url = `${bot
 		.getIntegration()
 		.getBaseURL()}/space/${spaceID}/list/${listId}/task${
-		queryString.length ? "?" + queryString : ""
+		queryParams.length ? "?" + queryParams.join("&") : ""
 	}`
 
 	const result = bot.http.request({
