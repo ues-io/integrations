@@ -39,10 +39,20 @@ export default function clickup_folders_load(bot: LoadBotApi) {
 		Object.entries(record).reduce(
 			(acc: Record<string, FieldValue>, [externalField, value]) => {
 				const uesioName = uesioFieldsByExternalName[externalField]
-				const fieldMetadata =
-					collectionMetadata.getFieldMetadata(uesioName)
-				if (fieldMetadata && fieldMetadata.type === "TIMESTAMP") {
-					value = Date.parse(value as string) / 1000
+				if (!uesioName) {
+					return acc
+				}
+				if (value !== null && value !== undefined) {
+					const fieldMetadata =
+						collectionMetadata.getFieldMetadata(uesioName)
+					if (fieldMetadata && fieldMetadata.type === "TIMESTAMP") {
+						const dateValue = Date.parse(value as string)
+						if (dateValue) {
+							value = dateValue / 1000
+						} else {
+							value = null
+						}
+					}
 				}
 				acc[uesioName] = value
 				return acc
