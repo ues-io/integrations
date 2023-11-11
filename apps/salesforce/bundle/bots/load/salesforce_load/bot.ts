@@ -3,7 +3,7 @@ import {
 	FieldRequest,
 	ConditionRequest,
 	LoadOrder,
-	FieldValue,
+	FieldValue
 } from "@uesio/bots"
 
 type SoqlResponse = {
@@ -15,11 +15,11 @@ type SoqlResponse = {
 export default function salesforce_load(bot: LoadBotApi) {
 	const {
 		batchNumber = 0,
-		batchSize,
+		batchSize = 100,
 		collectionMetadata,
 		conditions,
 		fields,
-		order,
+		order
 	} = bot.loadRequest
 	const soqlPath = "/services/data/v59.0/query/?q="
 
@@ -29,19 +29,19 @@ export default function salesforce_load(bot: LoadBotApi) {
 		// Defaults - these can be overridden
 		Name: "uesio/core.uniquekey",
 		CreatedDate: "uesio/core.createdat",
-		LastModifiedDate: "uesio/core.updatedat",
+		LastModifiedDate: "uesio/core.updatedat"
 	} as Record<string, string>
 	Object.entries(collectionMetadata.getAllFieldMetadata()).forEach(
 		([uesioFieldName, fieldMetadata]) => {
 			// Only expose fields that have a defined external field name
-			bot.log.info(
-				"uesioFieldName: " +
-					uesioFieldName +
-					", fieldMetadata external name: " +
-					fieldMetadata.externalName +
-					", name: " +
-					fieldMetadata.name
-			)
+			// bot.log.info(
+			// 	"uesioFieldName: " +
+			// 		uesioFieldName +
+			// 		", fieldMetadata external name: " +
+			// 		fieldMetadata.externalName +
+			// 		", name: " +
+			// 		fieldMetadata.name
+			// )
 			if (fieldMetadata.externalName) {
 				uesioFieldsBySalesforceName[fieldMetadata.externalName] =
 					uesioFieldName
@@ -66,12 +66,20 @@ export default function salesforce_load(bot: LoadBotApi) {
 				// Ignore special fields
 				if (sfField === "attributes") return acc
 				const uesioName = uesioFieldsBySalesforceName[sfField]
-				const fieldMetadata =
-					collectionMetadata.getFieldMetadata(uesioName)
-				if (fieldMetadata && fieldMetadata.type === "TIMESTAMP") {
-					// bot.log.info("sf TIMESTAMP value: " + value)
-					value = Date.parse(value as string) / 1000
-					// bot.log.info("UESIO TIMESTAMP value: " + value)
+				if (!uesioName) return acc
+				if (value !== null && value !== undefined) {
+					const fieldMetadata =
+						collectionMetadata.getFieldMetadata(uesioName)
+					if (fieldMetadata && fieldMetadata.type === "TIMESTAMP") {
+						// bot.log.info("sf TIMESTAMP value: " + value)
+						const dateValue = Date.parse(value as string)
+						if (dateValue) {
+							value = dateValue / 1000
+						} else {
+							value = null
+						}
+						// bot.log.info("UESIO TIMESTAMP value: " + value)
+					}
 				}
 				acc[uesioName] = value
 				// bot.log.info(
@@ -136,7 +144,6 @@ export default function salesforce_load(bot: LoadBotApi) {
 			)
 			.join(" AND ")
 	const parseOrders = (orders: LoadOrder[]) =>
-		"ORDER BY " +
 		orders
 			.map(
 				(order) =>
@@ -157,10 +164,10 @@ export default function salesforce_load(bot: LoadBotApi) {
 			? conditions.filter((c) => !c.inactive)
 			: []
 	if (activeConditions.length) {
-		clauses.push(parseConditions(activeConditions))
+		clauses.push(`WHERE ${parseConditions(activeConditions)}`)
 	}
 	if (order && order.length) {
-		clauses.push(parseOrders(order))
+		clauses.push(`ORDER BY ${parseOrders(order)}`)
 	}
 	if (batchSize) {
 		// Always fetch one more than asked for, so that we can determine if the server has more available
@@ -178,7 +185,7 @@ export default function salesforce_load(bot: LoadBotApi) {
 		url:
 			bot.getIntegration().getBaseURL() +
 			soqlPath +
-			encodeURIComponent(query),
+			encodeURIComponent(query)
 	})
 	bot.log.info(
 		"Response from salesforce: " +
