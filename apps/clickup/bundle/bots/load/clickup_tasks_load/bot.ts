@@ -12,7 +12,7 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 		id: "uesio/core.id",
 		date_created: "uesio/core.created_at",
 		date_updated: "uesio/core.updated_at",
-		list_id: `${namespace}.list->id`
+		list_id: `${namespace}.list->id`,
 	} as Record<string, string>
 	Object.entries(collectionMetadata.getAllFieldMetadata()).forEach(
 		([uesioFieldName, fieldMetadata]) => {
@@ -119,8 +119,8 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 		method: "GET",
 		url,
 		headers: {
-			"Content-Type": "application/json"
-		}
+			"Content-Type": "application/json",
+		},
 	})
 
 	if (result.code === 200) {

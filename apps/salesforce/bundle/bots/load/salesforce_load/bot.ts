@@ -3,7 +3,7 @@ import {
 	FieldRequest,
 	ConditionRequest,
 	LoadOrder,
-	FieldValue
+	FieldValue,
 } from "@uesio/bots"
 
 type SoqlResponse = {
@@ -19,7 +19,7 @@ export default function salesforce_load(bot: LoadBotApi) {
 		collectionMetadata,
 		conditions,
 		fields,
-		order
+		order,
 	} = bot.loadRequest
 	const soqlPath = "/services/data/v59.0/query/?q="
 
@@ -29,7 +29,7 @@ export default function salesforce_load(bot: LoadBotApi) {
 		// Defaults - these can be overridden
 		Name: "uesio/core.uniquekey",
 		CreatedDate: "uesio/core.createdat",
-		LastModifiedDate: "uesio/core.updatedat"
+		LastModifiedDate: "uesio/core.updatedat",
 	} as Record<string, string>
 	Object.entries(collectionMetadata.getAllFieldMetadata()).forEach(
 		([uesioFieldName, fieldMetadata]) => {
@@ -134,15 +134,67 @@ export default function salesforce_load(bot: LoadBotApi) {
 			return ["Id", "Name"]
 		}
 	}
-	const parseConditions = (conditions: ConditionRequest[]) =>
-		conditions
-			.map(
-				(c) =>
-					`(${salesforceFieldsByUesioName[c.field]} ${getSFOperator(
-						c.operator
-					)} ${c.value})`
-			)
-			.join(" AND ")
+	const escapeSingleQuotes = (value: string) => value.replace(/'/g, "\\'")
+	const unquotedFieldTypes = ["NUMBER", "CHECKBOX"]
+	const multiValueOperators = ["IN", "NOT_IN"]
+	const nullish = (value: FieldValue) => value === null || value === undefined
+	const parseCondition = (c: ConditionRequest) => {
+		const {
+			conditions = [] as ConditionRequest[],
+			conjunction = "OR",
+			subcollection,
+			subfield,
+			field,
+			fields,
+			value,
+			values,
+			type,
+			operator,
+		} = c
+		const sfFieldName = salesforceFieldsByUesioName[field]
+		const metadata = field
+			? collectionMetadata.getFieldMetadata(field)
+			: undefined
+		const wrapValueInQuotes = metadata
+			? !unquotedFieldTypes.includes(metadata.type)
+			: true
+		const sfOperator = getSFOperator(operator)
+		const getValue = (v: FieldValue) =>
+			wrapValueInQuotes && !nullish(v)
+				? `'${escapeSingleQuotes(v as string)}'`
+				: v
+		if (type === "SEARCH") {
+			// Implement a simple search by doing a LIKE on all fields provided
+			return (fields || [])
+				.map(
+					(f) =>
+						`${
+							salesforceFieldsByUesioName[f]
+						} LIKE '%${escapeSingleQuotes(value as string)}%'`
+				)
+				.join(" OR ")
+		} else if (type === "GROUP") {
+			return parseConditions(conditions, conjunction)
+		} else if (type === "SUBQUERY") {
+			return `${sfFieldName} IN (SELECT ${subfield} FROM ${subcollection} WHERE ${parseConditions(
+				conditions,
+				conjunction
+			)}`
+		} else if (multiValueOperators.includes(operator)) {
+			return `${sfFieldName} ${sfOperator} (${values
+				?.map(getValue)
+				.join(",")})`
+		} else {
+			return `(${sfFieldName} ${sfOperator} ${getValue(
+				value as FieldValue
+			)})`
+		}
+	}
+	const parseConditions = (
+		conditions: ConditionRequest[],
+		conjunction = "AND"
+	): string =>
+		`(${conditions.map(parseCondition).join(`) ${conjunction} (`)})`
 	const parseOrders = (orders: LoadOrder[]) =>
 		orders
 			.map(
@@ -185,7 +237,7 @@ export default function salesforce_load(bot: LoadBotApi) {
 		url:
 			bot.getIntegration().getBaseURL() +
 			soqlPath +
-			encodeURIComponent(query)
+			encodeURIComponent(query),
 	})
 	bot.log.info(
 		"Response from salesforce: " +
