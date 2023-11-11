@@ -14,8 +14,6 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 		date_updated: "uesio/core.updated_at",
 		list_id: `${namespace}.list->id`,
 	} as Record<string, string>
-	bot.log.info("collection name", collection)
-	bot.log.info("conditions", conditions)
 	Object.entries(collectionMetadata.getAllFieldMetadata()).forEach(
 		([uesioFieldName, fieldMetadata]) => {
 			// Only expose fields that have a defined external field name
@@ -33,18 +31,31 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 		acc[uesioField] = externalField
 		return acc
 	}, {} as Record<string, string>)
+
 	const getUesioItemFromExternalRecord = (
 		record: Record<string, FieldValue>
 	) =>
 		Object.entries(record).reduce(
 			(acc: Record<string, FieldValue>, [externalField, value]) => {
 				const uesioName = uesioFieldsByExternalName[externalField]
+				if (!uesioName) {
+					return acc
+				}
 				const fieldMetadata =
 					collectionMetadata.getFieldMetadata(uesioName)
-				if (fieldMetadata && fieldMetadata.type === "TIMESTAMP") {
-					value = Date.parse(value as string) / 1000
+				if (value && fieldMetadata) {
+					if (fieldMetadata.type === "TIMESTAMP") {
+						const dateVal = Date.parse(value as string)
+						if (dateVal) {
+							value = dateVal / 1000
+						} else {
+							value = null
+						}
+					}
 				}
-				acc[uesioName] = value
+				if (value !== undefined && value !== null) {
+					acc[uesioName] = value
+				}
 				return acc
 			},
 			{}
@@ -57,14 +68,7 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 		conditions.forEach((condition) => {
 			const { field, value } = condition
 			if (!field) return true
-
 			const externalFieldName = externalFieldsByUesioName[field]
-			bot.log.info(
-				"got condition on field: " +
-					field +
-					", external name: " +
-					externalFieldName
-			)
 			if (!externalFieldName) return
 			// TODO: For now we assume all Conditions are of type fieldValue
 			// Special case: "list->id", use this as the list id
@@ -110,8 +114,6 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 	const url = `${bot.getIntegration().getBaseURL()}/list/${listId}/task${
 		queryParams.length ? "?" + queryParams.join("&") : ""
 	}`
-
-	bot.log.info("URL is", url)
 
 	const result = bot.http.request({
 		method: "GET",

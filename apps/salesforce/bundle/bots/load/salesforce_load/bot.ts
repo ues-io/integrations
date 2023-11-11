@@ -15,7 +15,7 @@ type SoqlResponse = {
 export default function salesforce_load(bot: LoadBotApi) {
 	const {
 		batchNumber = 0,
-		batchSize,
+		batchSize = 100,
 		collectionMetadata,
 		conditions,
 		fields,
@@ -34,14 +34,14 @@ export default function salesforce_load(bot: LoadBotApi) {
 	Object.entries(collectionMetadata.getAllFieldMetadata()).forEach(
 		([uesioFieldName, fieldMetadata]) => {
 			// Only expose fields that have a defined external field name
-			bot.log.info(
-				"uesioFieldName: " +
-					uesioFieldName +
-					", fieldMetadata external name: " +
-					fieldMetadata.externalName +
-					", name: " +
-					fieldMetadata.name
-			)
+			// bot.log.info(
+			// 	"uesioFieldName: " +
+			// 		uesioFieldName +
+			// 		", fieldMetadata external name: " +
+			// 		fieldMetadata.externalName +
+			// 		", name: " +
+			// 		fieldMetadata.name
+			// )
 			if (fieldMetadata.externalName) {
 				uesioFieldsBySalesforceName[fieldMetadata.externalName] =
 					uesioFieldName
@@ -66,12 +66,20 @@ export default function salesforce_load(bot: LoadBotApi) {
 				// Ignore special fields
 				if (sfField === "attributes") return acc
 				const uesioName = uesioFieldsBySalesforceName[sfField]
-				const fieldMetadata =
-					collectionMetadata.getFieldMetadata(uesioName)
-				if (fieldMetadata && fieldMetadata.type === "TIMESTAMP") {
-					// bot.log.info("sf TIMESTAMP value: " + value)
-					value = Date.parse(value as string) / 1000
-					// bot.log.info("UESIO TIMESTAMP value: " + value)
+				if (!uesioName) return acc
+				if (value !== null && value !== undefined) {
+					const fieldMetadata =
+						collectionMetadata.getFieldMetadata(uesioName)
+					if (fieldMetadata && fieldMetadata.type === "TIMESTAMP") {
+						// bot.log.info("sf TIMESTAMP value: " + value)
+						const dateValue = Date.parse(value as string)
+						if (dateValue) {
+							value = dateValue / 1000
+						} else {
+							value = null
+						}
+						// bot.log.info("UESIO TIMESTAMP value: " + value)
+					}
 				}
 				acc[uesioName] = value
 				// bot.log.info(
@@ -126,17 +134,68 @@ export default function salesforce_load(bot: LoadBotApi) {
 			return ["Id", "Name"]
 		}
 	}
-	const parseConditions = (conditions: ConditionRequest[]) =>
-		conditions
-			.map(
-				(c) =>
-					`(${salesforceFieldsByUesioName[c.field]} ${getSFOperator(
-						c.operator
-					)} ${c.value})`
-			)
-			.join(" AND ")
+	const escapeSingleQuotes = (value: string) => value.replace(/'/g, "\\'")
+	const unquotedFieldTypes = ["NUMBER", "CHECKBOX"]
+	const multiValueOperators = ["IN", "NOT_IN"]
+	const nullish = (value: FieldValue) => value === null || value === undefined
+	const parseCondition = (c: ConditionRequest) => {
+		const {
+			conditions = [] as ConditionRequest[],
+			conjunction = "OR",
+			subcollection,
+			subfield,
+			field,
+			fields,
+			value,
+			values,
+			type,
+			operator,
+		} = c
+		const sfFieldName = salesforceFieldsByUesioName[field]
+		const metadata = field
+			? collectionMetadata.getFieldMetadata(field)
+			: undefined
+		const wrapValueInQuotes = metadata
+			? !unquotedFieldTypes.includes(metadata.type)
+			: true
+		const sfOperator = getSFOperator(operator)
+		const getValue = (v: FieldValue) =>
+			wrapValueInQuotes && !nullish(v)
+				? `'${escapeSingleQuotes(v as string)}'`
+				: v
+		if (type === "SEARCH") {
+			// Implement a simple search by doing a LIKE on all fields provided
+			return (fields || [])
+				.map(
+					(f) =>
+						`${
+							salesforceFieldsByUesioName[f]
+						} LIKE '%${escapeSingleQuotes(value as string)}%'`
+				)
+				.join(" OR ")
+		} else if (type === "GROUP") {
+			return parseConditions(conditions, conjunction)
+		} else if (type === "SUBQUERY") {
+			return `${sfFieldName} IN (SELECT ${subfield} FROM ${subcollection} WHERE ${parseConditions(
+				conditions,
+				conjunction
+			)}`
+		} else if (multiValueOperators.includes(operator)) {
+			return `${sfFieldName} ${sfOperator} (${values
+				?.map(getValue)
+				.join(",")})`
+		} else {
+			return `(${sfFieldName} ${sfOperator} ${getValue(
+				value as FieldValue
+			)})`
+		}
+	}
+	const parseConditions = (
+		conditions: ConditionRequest[],
+		conjunction = "AND"
+	): string =>
+		`(${conditions.map(parseCondition).join(`) ${conjunction} (`)})`
 	const parseOrders = (orders: LoadOrder[]) =>
-		"ORDER BY " +
 		orders
 			.map(
 				(order) =>
@@ -157,10 +216,10 @@ export default function salesforce_load(bot: LoadBotApi) {
 			? conditions.filter((c) => !c.inactive)
 			: []
 	if (activeConditions.length) {
-		clauses.push(parseConditions(activeConditions))
+		clauses.push(`WHERE ${parseConditions(activeConditions)}`)
 	}
 	if (order && order.length) {
-		clauses.push(parseOrders(order))
+		clauses.push(`ORDER BY ${parseOrders(order)}`)
 	}
 	if (batchSize) {
 		// Always fetch one more than asked for, so that we can determine if the server has more available
