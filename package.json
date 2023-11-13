@@ -39,6 +39,6 @@
 		"typescript": "4.8.4",
 		"@nx/eslint-plugin": "16.10.0",
 		"@nx/linter": "16.10.0",
-		"@nx/jest": "16.10.0"
+		"@nx/jest": "17.1.2"
 	}
 }
