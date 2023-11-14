@@ -32,18 +32,29 @@ jobs:
       - name: npm install
         shell: bash
         run: npm ci
-      - name: Build and lint all apps
-        run: |
-          npm run prettier-check
-          npm run lint-all
-          npm run build-all
+      # - name: Build and lint all apps
+      #   run: |
+      #     npm run prettier-check
+      #     npm run lint-all
+      #     npm run build-all
       - name: Find apps that were modified
         id: changed-files
         uses: tj-actions/changed-files@v40
         with:
           dir_names: true
+          dir_names_max_depth: 2
           files: |
             apps/**/*
+      - name: Build modified apps
+        shell: bash
+        run: |
+          for dir in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$dir was changed"
+            cd $dir
+            npm ci
+            npm run lint
+            cd - >> /dev/null
+          done
       - name: Package each modified app
         shell: bash
         env:

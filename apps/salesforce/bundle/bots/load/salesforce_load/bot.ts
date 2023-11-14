@@ -3,7 +3,7 @@ import {
 	FieldRequest,
 	ConditionRequest,
 	LoadOrder,
-	FieldValue
+	FieldValue,
 } from "@uesio/bots"
 
 type SoqlResponse = {
@@ -19,7 +19,7 @@ export default function salesforce_load(bot: LoadBotApi) {
 		collectionMetadata,
 		conditions,
 		fields,
-		order
+		order,
 	} = bot.loadRequest
 	const { baseUrl } = bot.getCredentials()
 
@@ -36,7 +36,7 @@ export default function salesforce_load(bot: LoadBotApi) {
 		// Defaults - these can be overridden
 		Name: "uesio/core.uniquekey",
 		CreatedDate: "uesio/core.createdat",
-		LastModifiedDate: "uesio/core.updatedat"
+		LastModifiedDate: "uesio/core.updatedat",
 	} as Record<string, string>
 	Object.entries(collectionMetadata.getAllFieldMetadata()).forEach(
 		([uesioFieldName, fieldMetadata]) => {
@@ -156,7 +156,7 @@ export default function salesforce_load(bot: LoadBotApi) {
 			value,
 			values,
 			type,
-			operator
+			operator,
 		} = c
 		const sfFieldName = salesforceFieldsByUesioName[field]
 		const metadata = field
@@ -241,7 +241,7 @@ export default function salesforce_load(bot: LoadBotApi) {
 	)
 	const response = bot.http.request({
 		method: "GET",
-		url: baseUrl + soqlPath + encodeURIComponent(query)
+		url: baseUrl + soqlPath + encodeURIComponent(query),
 	})
 	bot.log.info(
 		"Response from salesforce: " +

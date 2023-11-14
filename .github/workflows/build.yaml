@@ -43,6 +43,7 @@ jobs:
             cd $dir
             npm ci
             npm run lint
+            cd - >> /dev/null
           done
       # - name: Build and lint all apps
       #   run: |
