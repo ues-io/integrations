@@ -1,14 +1,13 @@
 {
 	"name": "salesforce",
 	"version": "0.0.1",
-	"description": "",
+	"description": "Salesforce integration for Uesio",
 	"scripts": {
 		"build": "uesio pack",
 		"lint-fix": "prettier --write . && eslint --fix -- bundle/**/*.ts*",
 		"lint": "prettier --check . && eslint -- bundle/**/*.ts* && tsc --project ./tsconfig.json --noEmit",
 		"push": "uesio pack && uesio deploy",
-		"pull": "uesio retrieve",
-		"publish": "uesio bundle create"
+		"pull": "uesio retrieve"
 	},
 	"devDependencies": {
 		"@types/react": "^18.2.0",

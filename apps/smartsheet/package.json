@@ -1,7 +1,7 @@
 {
-	"name": "uesio/smartsheet",
+	"name": "smartsheet",
 	"version": "0.0.1",
-	"description": "",
+	"description": "Smartsheet integration for Uesio",
 	"scripts": {
 		"build": "uesio pack",
 		"lint": "prettier --check . && eslint bundle/**/*.ts* && tsc --noEmit",

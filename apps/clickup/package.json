@@ -1,7 +1,7 @@
 {
 	"name": "clickup",
 	"version": "0.0.1",
-	"description": "",
+	"description": "Clickup integration for Uesio",
 	"scripts": {
 		"build": "uesio pack",
 		"lint-fix": "prettier --write . && eslint --fix -- bundle/**/*.ts*",
