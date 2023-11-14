@@ -29,9 +29,12 @@ export default function salesforce_save(bot: SaveBotApi) {
 	const { collectionMetadata } = bot.saveRequest
 	const servicesPath = `/services/data/v59.0`
 	const sobjectPath = `${servicesPath}/sobjects/${collectionMetadata.externalName}`
-	const compositePath = `${bot
-		.getIntegration()
-		.getBaseURL()}${servicesPath}/composite`
+	const { baseUrl } = bot.getCredentials()
+	if (!baseUrl)
+		throw new Error(
+			`Missing baseUrl in salesforce credentials. Please ensure you have configured a value for the "salesforce_url" config value`
+		)
+	const compositePath = `${baseUrl}${servicesPath}/composite`
 
 	// Build maps for quickly converting to/from Salesforce/Uesio field names
 	const uesioFieldsBySalesforceName = {

@@ -3,9 +3,15 @@ on:
   push:
     branches:
       - main
+    secrets:
+      UESIO_CLI_USERNAME:
+        required: true
+      UESIO_CLI_PASSWORD:
+        required: true
 
 jobs:
   build:
+    environment: prod
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -26,28 +32,41 @@ jobs:
       - name: npm install
         shell: bash
         run: npm ci
-      # - name: Find apps that were modified
-      #   id: changed-files
-      #   uses: tj-actions/changed-files@v40
-      #   with:
-      #     dir_names: true
-      #     files: |
-      #       apps/**/*
-      # - name: Build and lint each modified app
+      # - name: Build and lint all apps
       #   run: |
-      #     for dir in ${{ steps.changed-files.outputs.all_changed_files }}; do
-      #       echo "$dir was changed"
-      #       cd $dir
-      #       npm ci
-      #       npm run lint
-      #       # uesio pack
-      #     done
-      - name: Build and lint all apps
+      #     npm run prettier-check
+      #     npm run lint-all
+      #     npm run build-all
+      - name: Find apps that were modified
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          dir_names: true
+          dir_names_max_depth: 2
+          files: |
+            apps/**/*
+      - name: Build modified apps
+        shell: bash
         run: |
-          npm run prettier-check
-          npm run lint-all
-          npm run build-all
-  # deploy:
-  #   name: Build and release
-  #   uses: ./.github/workflows/patch_build_and_release.yaml
-  #   secrets: inherit
+          for dir in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$dir was changed"
+            cd $dir
+            npm ci
+            npm run lint
+            cd - >> /dev/null
+          done
+      - name: Package each modified app
+        shell: bash
+        env:
+          UESIO_CLI_USERNAME: ${{ secrets.UESIO_CLI_USERNAME }}
+          UESIO_CLI_PASSWORD: ${{ secrets.UESIO_CLI_PASSWORD }}
+          UESIO_CLI_HOST: ${{ vars.UESIO_CLI_HOST }}
+          UESIO_CLI_LOGIN_METHOD: uesio/core.platform
+        # run: bash bundle-all.sh
+        run: |
+          for dir in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$dir was changed"
+            bash bundle.sh $dir
+          done
+          
+          
