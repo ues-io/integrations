@@ -1,3 +1,4 @@
 name: salesforce_save
 type: SAVE
 dialect: TYPESCRIPT
+public: true

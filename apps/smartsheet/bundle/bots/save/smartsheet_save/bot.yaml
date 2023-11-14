@@ -1,4 +1,4 @@
-name: salesforce_load
-type: LOAD
+name: smartsheet_save
+type: SAVE
 dialect: TYPESCRIPT
 public: true
