@@ -1,0 +1,4 @@
+name: salesforce_url
+public: true
+store: platform
+managedBy: site

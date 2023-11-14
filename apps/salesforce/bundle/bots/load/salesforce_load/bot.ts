@@ -21,6 +21,13 @@ export default function salesforce_load(bot: LoadBotApi) {
 		fields,
 		order,
 	} = bot.loadRequest
+	const { baseUrl } = bot.getCredentials()
+
+	if (!baseUrl)
+		throw new Error(
+			`Missing baseUrl in salesforce credentials. Please ensure you have configured a value for the "salesforce_url" config value`
+		)
+
 	const soqlPath = "/services/data/v59.0/query/?q="
 
 	// Build maps for quickly converting to/from Salesforce/Uesio field names
@@ -234,10 +241,7 @@ export default function salesforce_load(bot: LoadBotApi) {
 	)
 	const response = bot.http.request({
 		method: "GET",
-		url:
-			bot.getIntegration().getBaseURL() +
-			soqlPath +
-			encodeURIComponent(query),
+		url: baseUrl + soqlPath + encodeURIComponent(query),
 	})
 	bot.log.info(
 		"Response from salesforce: " +

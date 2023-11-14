@@ -28,24 +28,25 @@ jobs:
       - name: npm install
         shell: bash
         run: npm ci
-      # - name: Find apps that were modified
-      #   id: changed-files
-      #   uses: tj-actions/changed-files@v40
-      #   with:
-      #     dir_names: true
-      #     files: |
-      #       apps/**/*
-      # - name: Build and lint each modified app
-      #   run: |
-      #     for dir in ${{ steps.changed-files.outputs.all_changed_files }}; do
-      #       echo "$dir was changed"
-      #       cd $dir
-      #       npm ci
-      #       npm run lint
-      #       # uesio pack
-      #     done
-      - name: Build and lint all apps
+      - name: Find apps that were modified
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          dir_names: true
+          dir_names_max_depth: 2
+          files: |
+            apps/**/*
+      - name: Build and lint each modified app
         run: |
-          npm run prettier-check
-          npm run lint-all
-          npm run build-all
+          for dir in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$dir was changed"
+            cd $dir
+            npm ci
+            npm run lint
+            cd - >> /dev/null
+          done
+      # - name: Build and lint all apps
+      #   run: |
+      #     npm run prettier-check
+      #     npm run lint-all
+      #     npm run build-all
