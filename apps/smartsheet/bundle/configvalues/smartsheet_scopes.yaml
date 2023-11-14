@@ -1,0 +1,5 @@
+name: smartsheet_scopes
+store: platform
+managedBy: site
+defaultValue: READ_SHEETS,WRITE_SHEETS
+public: true

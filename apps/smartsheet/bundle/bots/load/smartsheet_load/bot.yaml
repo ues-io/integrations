@@ -1,4 +1,4 @@
-name: salesforce_load
+name: smartsheet_load
 type: LOAD
 dialect: TYPESCRIPT
 public: true
