@@ -29,9 +29,12 @@ export default function salesforce_save(bot: SaveBotApi) {
 	const { collectionMetadata } = bot.saveRequest
 	const servicesPath = `/services/data/v59.0`
 	const sobjectPath = `${servicesPath}/sobjects/${collectionMetadata.externalName}`
-	const compositePath = `${bot
-		.getIntegration()
-		.getBaseURL()}${servicesPath}/composite`
+	const { baseUrl } = bot.getCredentials()
+	if (!baseUrl)
+		throw new Error(
+			`Missing baseUrl in salesforce credentials. Please ensure you have configured a value for the "salesforce_url" config value`
+		)
+	const compositePath = `${baseUrl}${servicesPath}/composite`
 
 	// Build maps for quickly converting to/from Salesforce/Uesio field names
 	const uesioFieldsBySalesforceName = {
@@ -39,7 +42,7 @@ export default function salesforce_save(bot: SaveBotApi) {
 		// Defaults - these can be overridden
 		Name: "uesio/core.uniquekey",
 		CreatedDate: "uesio/core.createdat",
-		LastModifiedDate: "uesio/core.updatedat",
+		LastModifiedDate: "uesio/core.updatedat"
 	} as Record<string, string>
 	Object.entries(collectionMetadata.getAllFieldMetadata()).forEach(
 		([uesioFieldName, fieldMetadata]) => {
@@ -142,7 +145,7 @@ export default function salesforce_save(bot: SaveBotApi) {
 	const subRequests = [] as Subrequest[]
 	const compositeRequest = {
 		allOrNone: true,
-		compositeRequest: subRequests,
+		compositeRequest: subRequests
 	} as CompositeRequest
 
 	const sanitizeRefId = (id: string) => id.replace(/[^a-zA-Z0-9_]/g, "")
@@ -160,7 +163,7 @@ export default function salesforce_save(bot: SaveBotApi) {
 		const subRequest = {
 			method: "DELETE",
 			url: `${sobjectPath}/${id}`,
-			referenceId: refId,
+			referenceId: refId
 		} as Subrequest
 		subRequests.push(subRequest)
 	})
@@ -175,13 +178,13 @@ export default function salesforce_save(bot: SaveBotApi) {
 			body: createSalesforceRecordFromUesioRecord(
 				insertApi.getAll(),
 				false
-			),
+			)
 		} as Subrequest
 		// Also add a request to query for the inserted record, to get fields created after save
 		const queryRequest = {
 			method: "GET",
 			url: `${sobjectPath}/@{${refId}.id}`,
-			referenceId: queryRefId,
+			referenceId: queryRefId
 		} as Subrequest
 		subRequests.push(insertRequest, queryRequest)
 	})
@@ -198,7 +201,7 @@ export default function salesforce_save(bot: SaveBotApi) {
 			method: "PATCH",
 			url: `${sobjectPath}/${id}`,
 			referenceId: refId,
-			body: sfUpdates,
+			body: sfUpdates
 		} as Subrequest
 		// Also add a request to query for the updated record, to get fields created after save
 		const queryRequest = {
@@ -206,7 +209,7 @@ export default function salesforce_save(bot: SaveBotApi) {
 			url: `${sobjectPath}/${id}?fields=${Object.keys(sfUpdates).join(
 				","
 			)}`,
-			referenceId: queryRefId,
+			referenceId: queryRefId
 		} as Subrequest
 		subRequests.push(updateRequest, queryRequest)
 	})
@@ -218,8 +221,8 @@ export default function salesforce_save(bot: SaveBotApi) {
 		url: compositePath,
 		body: compositeRequest,
 		headers: {
-			"Content-Type": "application/json",
-		},
+			"Content-Type": "application/json"
+		}
 	})
 
 	bot.log.info(
