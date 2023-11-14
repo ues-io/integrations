@@ -1,0 +1,5 @@
+name: salesforce
+type: salesforce
+authentication: OAUTH2_AUTHORIZATION_CODE
+credentials: salesforce
+public: true
