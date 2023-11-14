@@ -43,9 +43,8 @@ jobs:
           UESIO_CLI_HOST: ${{ vars.UESIO_CLI_HOST }}
           UESIO_CLI_LOGIN_METHOD: uesio/core.platform
         run: |
-          [ ! -d "/apps/${{ inputs.app }}" ] && echo "Invalid app name" && exit 1
           echo "Building ${{ inputs.app }}"
-          cd "/apps/${{ inputs.app }}"
+          cd /apps/${{ inputs.app }}
           npm ci
           npm run lint
           cd ../..
