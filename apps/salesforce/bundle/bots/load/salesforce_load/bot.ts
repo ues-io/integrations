@@ -118,6 +118,8 @@ export default function salesforce_load(bot: LoadBotApi) {
 				return "!="
 			case "EQ":
 				return "="
+			case "IN":
+				return "IN"
 			default:
 				return "="
 		}
