@@ -1,0 +1,5 @@
+name: smartsheet_authorize_url
+store: platform
+managedBy: site
+defaultValue: https://app.smartsheet.com/b/authorize
+public: true
