@@ -1,0 +1,21 @@
+name: Manual Patch release
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: "App"
+        required: true
+        type: choice
+        options:
+          - salesforce
+          - clickup
+          - smartsheet
+
+jobs:
+  deploy:
+    name: Build and release ${{ inputs.app }}
+    uses: ./.github/workflows/patch_build_and_release.yaml
+    with:
+      app: ${{ inputs.app }}
+    secrets: inherit
