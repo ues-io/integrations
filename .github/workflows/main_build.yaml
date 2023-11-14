@@ -26,7 +26,7 @@ jobs:
         shell: bash
         run: |
           # Symlink the Uesio CLI for subsequent use
-          wget -q https://docs.ues.io/site/files/uesio/docs/v1.1.2/clilinux
+          wget -q https://docs.ues.io/site/files/uesio/docs/v1.1.3/clilinux
           chmod +x clilinux
           sudo ln -s $PWD/clilinux /usr/local/bin/uesio
       - name: npm install
