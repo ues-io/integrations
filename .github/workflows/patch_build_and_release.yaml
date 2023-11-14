@@ -44,8 +44,8 @@ jobs:
           UESIO_CLI_LOGIN_METHOD: uesio/core.platform
         run: |
           echo "Building ${{ inputs.app }}"
-          cd /apps/${{ inputs.app }}
+          cd apps/${{ inputs.app }}
           npm ci
           npm run lint
-          cd ../..
-          bash bundle.sh /apps/${{ inputs.app }}
+          cd - >> /dev/null
+          bash bundle.sh apps/${{ inputs.app }}
