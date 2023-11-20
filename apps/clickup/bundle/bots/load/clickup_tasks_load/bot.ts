@@ -95,7 +95,7 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 		)
 	// Either List id or Task Id must be provided by conditions
 	let listId, taskId
-	const queryParams = ["archived=false"] as string[]
+	const queryParams = [] as string[]
 	const buildQueryStringConditions = () => {
 		if (!conditions || !conditions.length) return
 		conditions.forEach((condition) => {
@@ -167,14 +167,11 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 			bot.addRecord(getUesioItemFromExternalRecord(item))
 		})
 	} else {
+		const resultBody = JSON.stringify(result.body)
 		bot.log.error(
 			"result",
-			result.code +
-				", " +
-				JSON.stringify(result.body) +
-				", status: " +
-				result.status
+			result.code + ", " + resultBody + ", status: " + result.status
 		)
-		throw new Error("failed to fetch Tasks: " + result.status)
+		throw new Error("failed to fetch Tasks, error: " + resultBody)
 	}
 }
