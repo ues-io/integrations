@@ -4,6 +4,22 @@ type TasksResponse = {
 	tasks: Record<string, FieldValue>[]
 }
 
+type TypeConfigOption = {
+	name: string
+	orderindex: number
+}
+
+type TypeConfig = {
+	options: TypeConfigOption[]
+}
+
+type CustomFieldResponse = {
+	id: string
+	name: string
+	value: FieldValue
+	type_config: TypeConfig
+}
+
 export default function clickup_tasks_load(bot: LoadBotApi) {
 	const { conditions, collectionMetadata, collection } = bot.loadRequest
 	const namespace = collection.split(".")[0]
@@ -43,6 +59,23 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 				}
 				const fieldMetadata =
 					collectionMetadata.getFieldMetadata(uesioName)
+				// Special handling for "custom_fields" - convert the list of custom field values
+				// into a map so that each field can be easily accessed by its name
+				if (
+					externalField === "custom_fields" &&
+					value &&
+					Array.isArray(value as CustomFieldResponse[])
+				) {
+					acc[uesioName] = (value as CustomFieldResponse[]).reduce(
+						(customFieldValues, customFieldResponse) => {
+							customFieldValues[customFieldResponse.id] =
+								customFieldResponse
+							return customFieldValues
+						},
+						{} as Record<string, FieldValue>
+					)
+					return acc
+				}
 				if (value && fieldMetadata) {
 					if (fieldMetadata.type === "TIMESTAMP") {
 						const dateVal = Date.parse(value as string)
@@ -60,8 +93,8 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 			},
 			{}
 		)
-	// List id must be provided by conditions
-	let listId
+	// Either List id or Task Id must be provided by conditions
+	let listId, taskId
 	const queryParams = ["archived=false"] as string[]
 	const buildQueryStringConditions = () => {
 		if (!conditions || !conditions.length) return
@@ -74,6 +107,11 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 			// Special case: "list->id", use this as the list id
 			if (externalFieldName === "list_id") {
 				listId = condition.value
+				return
+			}
+			// Special case: "uesio/core.id", use this as the task id condition
+			if (field === "uesio/core.id") {
+				taskId = condition.value
 				return
 			}
 			if (value === null || value === undefined) return
@@ -105,15 +143,15 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 	}
 	buildQueryStringConditions()
 
-	if (!listId) {
+	if (!listId && !taskId) {
 		throw new Error(
-			"Clickup Tasks Load Bot requires a list id condition to be set"
+			"querying Clickup Tasks requires either a list id or task id condition to be set"
 		)
 	}
 
-	const url = `${bot.getIntegration().getBaseURL()}/list/${listId}/task${
-		queryParams.length ? "?" + queryParams.join("&") : ""
-	}`
+	const url = `${bot.getIntegration().getBaseURL()}/${
+		listId ? `list/${listId}/task` : `task/${taskId}`
+	}${queryParams.length ? "?" + queryParams.join("&") : ""}`
 
 	const result = bot.http.request({
 		method: "GET",
