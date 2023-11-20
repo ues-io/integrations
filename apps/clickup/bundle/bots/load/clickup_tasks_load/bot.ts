@@ -93,8 +93,8 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 			},
 			{}
 		)
-	// List id must be provided by conditions
-	let listId
+	// Either List id or Task Id must be provided by conditions
+	let listId, taskId
 	const queryParams = ["archived=false"] as string[]
 	const buildQueryStringConditions = () => {
 		if (!conditions || !conditions.length) return
@@ -107,6 +107,11 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 			// Special case: "list->id", use this as the list id
 			if (externalFieldName === "list_id") {
 				listId = condition.value
+				return
+			}
+			// Special case: "uesio/core.id", use this as the task id condition
+			if (field === "uesio/core.id") {
+				taskId = condition.value
 				return
 			}
 			if (value === null || value === undefined) return
@@ -138,15 +143,15 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 	}
 	buildQueryStringConditions()
 
-	if (!listId) {
+	if (!listId && !taskId) {
 		throw new Error(
-			"Clickup Tasks Load Bot requires a list id condition to be set"
+			"querying Clickup Tasks requires either a list id or task id condition to be set"
 		)
 	}
 
-	const url = `${bot.getIntegration().getBaseURL()}/list/${listId}/task${
-		queryParams.length ? "?" + queryParams.join("&") : ""
-	}`
+	const url = `${bot.getIntegration().getBaseURL()}/${
+		listId ? `list/${listId}/task` : `task/${taskId}`
+	}${queryParams.length ? "?" + queryParams.join("&") : ""}`
 
 	const result = bot.http.request({
 		method: "GET",
