@@ -1,3 +1,4 @@
 name: clickup_tasks_load
+public: true
 type: LOAD
 dialect: TYPESCRIPT

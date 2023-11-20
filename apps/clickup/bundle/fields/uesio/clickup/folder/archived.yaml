@@ -1,4 +1,5 @@
 name: archived
+public: true
 type: CHECKBOX
 label: Archived
 columnname: archived

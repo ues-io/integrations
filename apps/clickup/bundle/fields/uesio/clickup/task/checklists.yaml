@@ -1,4 +1,5 @@
 name: checklists
+public: true
 type: LIST
 label: Checklist
 subtype: TEXT

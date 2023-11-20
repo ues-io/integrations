@@ -1,3 +1,4 @@
 name: clickup_folders_save
+public: true
 type: SAVE
 dialect: TYPESCRIPT

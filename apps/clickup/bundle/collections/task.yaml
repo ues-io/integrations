@@ -1,4 +1,5 @@
 name: task
+public: true
 type: EXTERNAL
 label: Task
 pluralLabel: Tasks

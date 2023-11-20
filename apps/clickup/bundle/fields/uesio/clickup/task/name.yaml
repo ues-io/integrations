@@ -1,4 +1,5 @@
 name: name
+public: true
 type: TEXT
 label: Name
 required: true

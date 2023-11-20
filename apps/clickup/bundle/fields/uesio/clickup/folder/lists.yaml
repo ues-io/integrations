@@ -1,4 +1,5 @@
 name: lists
+public: true
 type: LIST
 label: Lists
 subfields:

@@ -1,4 +1,5 @@
 name: tags
+public: true
 type: LIST
 label: Tags
 subtype: TEXT

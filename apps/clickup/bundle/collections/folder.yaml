@@ -1,4 +1,5 @@
 name: folder
+public: true
 type: EXTERNAL
 label: Folder
 pluralLabel: Folders

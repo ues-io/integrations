@@ -5,12 +5,6 @@ type FoldersResponse = {
 }
 
 export default function clickup_folders_load(bot: LoadBotApi) {
-	const spaceID = bot.getCredentials().defaultSpaceId
-	if (!spaceID) {
-		throw new Error(
-			"Default Clickup Space ID Config Value must be set. Please check your Site / Workspace settings."
-		)
-	}
 	const { conditions, collectionMetadata } = bot.loadRequest
 	// Build maps for quickly converting to/from Uesio/external field names
 	const uesioFieldsByExternalName = {
@@ -59,6 +53,27 @@ export default function clickup_folders_load(bot: LoadBotApi) {
 			},
 			{}
 		)
+
+	let spaceID = bot.getCredentials().defaultSpaceId
+
+	// See if there is a Condition that specifies a particular space id
+	if (conditions && conditions.length) {
+		const spaceIdCondition = conditions.find(
+			(condition) =>
+				condition.field === "space.id" &&
+				condition.operator === "EQ" &&
+				!!condition.value
+		)
+		if (spaceIdCondition) {
+			spaceID = spaceIdCondition.value as string
+		}
+	}
+
+	if (!spaceID) {
+		throw new Error(
+			"A valid space id is required, but no condition on space.id was provided, nor was a default Clickup Space ID Config Value found."
+		)
+	}
 
 	const url = `${bot
 		.getIntegration()

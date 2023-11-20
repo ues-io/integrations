@@ -1,4 +1,5 @@
 name: orderindex
+public: true
 type: NUMBER
 label: Order Index
 columnname: orderindex

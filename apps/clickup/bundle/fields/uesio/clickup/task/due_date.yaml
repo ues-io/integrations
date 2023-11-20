@@ -1,4 +1,5 @@
 name: due_date
+public: true
 type: TIMESTAMP
 label: Due Date
 required: true

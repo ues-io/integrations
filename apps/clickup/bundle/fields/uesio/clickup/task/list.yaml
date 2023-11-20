@@ -1,4 +1,5 @@
 name: list
+public: true
 type: STRUCT
 label: List
 subfields:
