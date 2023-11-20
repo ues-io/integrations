@@ -1,0 +1,12 @@
+name: space
+public: true
+type: STRUCT
+label: Space
+subfields:
+  - name: id
+    label: Id
+    type: TEXT
+  - name: name
+    label: Name
+    type: TEXT
+columnname: space

@@ -1,4 +1,5 @@
 name: task_count
+public: true
 type: NUMBER
 label: Task Count
 columnname: task_count

@@ -1,4 +1,5 @@
 name: status
+public: true
 type: STRUCT
 label: Status
 subfields:

@@ -1,4 +1,5 @@
 name: markdown_description
+public: true
 type: LONGTEXT
 label: Markdown Description
 columnname: markdown_description

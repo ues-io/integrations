@@ -1,4 +1,5 @@
 name: date_closed
+public: true
 type: TIMESTAMP
 label: Date Closed
 required: true

@@ -1,4 +1,5 @@
 name: start_date
+public: true
 type: TIMESTAMP
 label: Start Date
 required: true

@@ -1,4 +1,5 @@
 name: priority
+public: true
 type: TEXT
 label: Priority
 required: true
