@@ -144,9 +144,10 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 	buildQueryStringConditions()
 
 	if (!listId && !taskId) {
-		throw new Error(
+		bot.log.warn(
 			"querying Clickup Tasks requires either a list id or task id condition to be set"
 		)
+		return
 	}
 
 	const url = `${bot.getIntegration().getBaseURL()}/${
@@ -174,6 +175,6 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 				", status: " +
 				result.status
 		)
-		bot.addError("failed to fetch Tasks: " + result.status)
+		throw new Error("failed to fetch Tasks: " + result.status)
 	}
 }
