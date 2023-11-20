@@ -1,7 +1,8 @@
 name: custom_fields
 public: true
-type: STRUCT
-label: List
+type: MAP
+subtype: STRUCT
+label: Custom Fields
 subfields:
   - name: id
     label: Field Id

@@ -4,6 +4,22 @@ type TasksResponse = {
 	tasks: Record<string, FieldValue>[]
 }
 
+type TypeConfigOption = {
+	name: string
+	orderindex: number
+}
+
+type TypeConfig = {
+	options: TypeConfigOption[]
+}
+
+type CustomFieldResponse = {
+	id: string
+	name: string
+	value: FieldValue
+	type_config: TypeConfig
+}
+
 export default function clickup_tasks_load(bot: LoadBotApi) {
 	const { conditions, collectionMetadata, collection } = bot.loadRequest
 	const namespace = collection.split(".")[0]
@@ -43,6 +59,23 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 				}
 				const fieldMetadata =
 					collectionMetadata.getFieldMetadata(uesioName)
+				// Special handling for "custom_fields" - convert the list of custom field values
+				// into a map so that each field can be easily accessed by its name
+				if (
+					externalField === "custom_fields" &&
+					value &&
+					Array.isArray(value as CustomFieldResponse[])
+				) {
+					acc[uesioName] = (value as CustomFieldResponse[]).reduce(
+						(customFieldValues, customFieldResponse) => {
+							customFieldValues[customFieldResponse.id] =
+								customFieldResponse
+							return customFieldValues
+						},
+						{} as Record<string, FieldValue>
+					)
+					return acc
+				}
 				if (value && fieldMetadata) {
 					if (fieldMetadata.type === "TIMESTAMP") {
 						const dateVal = Date.parse(value as string)
