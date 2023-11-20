@@ -1,4 +1,5 @@
 name: clickup
+public: true
 type: clickup
 authentication: API_KEY
 credentials: clickup_api_key
