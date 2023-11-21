@@ -28,10 +28,12 @@ export default function smartsheet_load(bot: LoadBotApi) {
 		conditions,
 	} = bot.loadRequest
 	const queryParams = {} as Record<string, FieldValue>
-	if (typeof batchSize === "number" && batchSize > 0) {
+	const doPagination = typeof batchSize === "number" && batchSize > 0
+	if (doPagination) {
 		// SmartSheet pagination uses 1-based indexing
 		queryParams.page = batchNumber + 1
-		queryParams.pageSize = batchSize
+		// Always add one to to the batch size to determine if there are more records
+		queryParams.pageSize = batchSize + 1
 	} else {
 		queryParams.includeAll = true
 	}
@@ -71,7 +73,17 @@ export default function smartsheet_load(bot: LoadBotApi) {
 		}
 	})
 
-	body.rows.forEach((row) => {
+	const maxRecordForPagination = doPagination
+		? (queryParams.pageSize as number) - 1
+		: -1
+	body.rows.forEach((row, i) => {
+		// If we are on the final row, do NOT add it to the bot's records,
+		// since we requested one more than we needed, but DO set has more records
+		// so that Uesio pagination controls will work
+		if (doPagination && i === maxRecordForPagination) {
+			bot.setHasMoreRecords()
+			return
+		}
 		const record: Record<string, FieldValue> = {
 			"uesio/core.id": row.id + "",
 		}

@@ -1,5 +1,28 @@
-import { LoadBotApi } from "@uesio/bots"
+import { FieldValue, LoadBotApi, LoadRequestMetadata } from "@uesio/bots"
 import smartsheet_load from "../bundle/bots/load/smartsheet_load/bot"
+
+const sampleUesioCollectionName = "tasks"
+const sampleUesioNS = "luigi/foo"
+const mockBot = (
+	returnRecords: Record<string, FieldValue>[],
+	loadRequest?: Partial<LoadRequestMetadata>
+) => ({
+	loadRequest: {
+		collection: `${sampleUesioNS}.${sampleUesioCollectionName}`,
+		collectionMetadata: getSampleCollectionMetadata(),
+		...(loadRequest || {}),
+	},
+	addRecord: jest.fn(),
+	setHasMoreRecords: jest.fn(),
+	http: {
+		request: jest.fn(() => ({
+			code: 200,
+			body: {
+				rows: returnRecords,
+			},
+		})),
+	},
+})
 
 const row1 = {
 	id: 1,
@@ -32,8 +55,11 @@ const row2 = {
 	],
 }
 
+const smartSheetBaseUrl = "https://api.smartsheet.com/2.0/sheets"
+const sheetId = "somesheetid"
+
 const getSampleCollectionMetadata = () => ({
-	externalName: "somesheetid",
+	externalName: sheetId,
 	getAllFieldMetadata: jest.fn(() => ({
 		"uesio/smartsheet.name": {
 			externalName: "taskname",
@@ -60,98 +86,66 @@ const uesioRow2 = {
 
 describe("Smartsheet Load", () => {
 	it("should load data from Smartsheet", () => {
-		const addRecord = jest.fn()
-		const bot = {
-			loadRequest: {
-				collectionMetadata: getSampleCollectionMetadata(),
-			},
-			addRecord,
-			http: {
-				request: jest.fn(() => ({
-					code: 200,
-					body: {
-						rows: [row1, row2],
-					},
-				})),
-			},
-		}
-
+		const bot = mockBot([row1, row2])
 		smartsheet_load(bot as unknown as LoadBotApi)
-
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow1)
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow2)
 	})
 	it("should only return specific rows from a sheet if uesio/core.id condition exists (multi-value)", () => {
-		const addRecord = jest.fn()
-		const request = jest.fn(() => ({
-			code: 200,
-			body: {
-				rows: [row1, row2],
-			},
-		}))
-		const bot = {
-			loadRequest: {
-				batchSize: 1,
-				batchNumber: 0,
-				collectionMetadata: getSampleCollectionMetadata(),
-				conditions: [
-					{
-						field: "uesio/core.id",
-						operator: "IN",
-						values: ["1", "2"],
-					},
-				],
-			},
-			addRecord,
-			http: {
-				request,
-			},
-		}
-
+		const bot = mockBot([row1, row2], {
+			batchSize: 10,
+			batchNumber: 0,
+			conditions: [
+				{
+					field: "uesio/core.id",
+					operator: "IN",
+					values: ["1", "2"],
+				},
+			],
+		})
 		smartsheet_load(bot as unknown as LoadBotApi)
-
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow1)
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow2)
-
-		expect(request).toHaveBeenCalledWith({
+		// We asked for up to 10 records, but only got back 2, so there are no more records available
+		expect(bot.setHasMoreRecords).toHaveBeenCalledTimes(0)
+		expect(bot.http.request).toHaveBeenCalledWith({
 			method: "GET",
-			url: "https://api.smartsheet.com/2.0/sheets/somesheetid?page=1&pageSize=1&rowIds=1%2C2",
+			url: `${smartSheetBaseUrl}/${sheetId}?page=1&pageSize=11&rowIds=1%2C2`,
 		})
 	})
 	it("should only return one row from a sheet if uesio/core.id condition exists (single-value)", () => {
-		const addRecord = jest.fn()
-		const request = jest.fn(() => ({
-			code: 200,
-			body: {
-				rows: [row2],
-			},
-		}))
-		const bot = {
-			loadRequest: {
-				batchSize: 1,
-				batchNumber: 0,
-				collectionMetadata: getSampleCollectionMetadata(),
-				conditions: [
-					{
-						field: "uesio/core.id",
-						operator: "EQ",
-						value: "2",
-					},
-				],
-			},
-			addRecord,
-			http: {
-				request,
-			},
-		}
-
+		const bot = mockBot([row2], {
+			batchSize: 1,
+			batchNumber: 0,
+			conditions: [
+				{
+					field: "uesio/core.id",
+					operator: "EQ",
+					value: "2",
+				},
+			],
+		})
 		smartsheet_load(bot as unknown as LoadBotApi)
-
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow2)
-
-		expect(request).toHaveBeenCalledWith({
+		// We asked for up to 1 records, but only got back 1, so there are no more records available
+		expect(bot.setHasMoreRecords).toHaveBeenCalledTimes(0)
+		expect(bot.http.request).toHaveBeenCalledWith({
 			method: "GET",
-			url: "https://api.smartsheet.com/2.0/sheets/somesheetid?page=1&pageSize=1&rowIds=2",
+			url: `${smartSheetBaseUrl}/${sheetId}?page=1&pageSize=2&rowIds=2`,
+		})
+	})
+	it("should indicate that there are more records available from server", () => {
+		const bot = mockBot([row1, row2], {
+			batchSize: 1,
+			batchNumber: 0,
+		})
+		smartsheet_load(bot as unknown as LoadBotApi)
+		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow1)
+		// We asked for up to 1 records, and got back 2, so there ARE records available
+		expect(bot.setHasMoreRecords).toHaveBeenCalled()
+		expect(bot.http.request).toHaveBeenCalledWith({
+			method: "GET",
+			url: `${smartSheetBaseUrl}/${sheetId}?page=1&pageSize=2`,
 		})
 	})
 })
