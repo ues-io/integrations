@@ -255,7 +255,6 @@ export default function salesforce_load(bot: LoadBotApi) {
 		let errMessage = ""
 		let responseObj: Record<string, object>
 		if (typeof response.body === "string") {
-			//bot.log.info("response body is string")
 			try {
 				responseObj = JSON.parse(response.body as string)
 				if (responseObj.error) {
@@ -263,14 +262,20 @@ export default function salesforce_load(bot: LoadBotApi) {
 				}
 				// eslint-disable-next-line no-empty
 			} catch (e) {}
-		} else {
-			errMessage = response.body as unknown as string
+		} else if (response.body && typeof response.body === "object") {
+			if (response.body.error) {
+				errMessage = response.body.error as string
+			} else {
+				bot.log.error(
+					"unexpected error response from salesforce",
+					response.body
+				)
+			}
 		}
 		if (errMessage) {
-			bot.log.error("error from salesforce", errMessage)
-			bot.addError(errMessage)
+			bot.addError("error making salesforce request: " + errMessage)
+			return
 		}
-
 		return
 	}
 	const soqlResponse = response.body as SoqlResponse

@@ -243,13 +243,19 @@ export default function salesforce_save(bot: SaveBotApi) {
 				}
 				// eslint-disable-next-line no-empty
 			} catch (e) {}
-		} else {
-			errMessage = response.body as unknown as string
+		} else if (response.body && typeof response.body === "object") {
+			if (response.body.error) {
+				errMessage = response.body.error as string
+			}
 		}
 		if (errMessage) {
-			bot.log.error("error from salesforce", errMessage)
+			bot.addError(
+				"error making salesforce request: " + errMessage,
+				"",
+				""
+			)
+			return
 		}
-		// bot.addError(errMessage)
 		return
 	}
 	const responseBody = response.body as CompositeResponse
