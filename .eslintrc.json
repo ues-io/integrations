@@ -13,10 +13,10 @@
 			"rules": {}
 		},
 		{
-			"files": ["*.spec.ts", "*.spec.tsx"],
+			"files": ["**/*.spec.ts", "**/*.spec.tsx"],
 			"env": {
 				"jest": true,
-				"browser": true
+				"browser": false
 			}
 		},
 		{
