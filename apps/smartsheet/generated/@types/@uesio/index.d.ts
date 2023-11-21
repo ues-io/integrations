@@ -284,6 +284,7 @@ export type {
 	LoadBotApi,
 	LoadOrder,
 	LoadRequest,
+	LoadRequestMetadata,
 	RunActionBotApi,
 	SaveBotApi,
 	WireRecord,

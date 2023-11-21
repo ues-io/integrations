@@ -25,15 +25,15 @@ export default function smartsheet_load(bot: LoadBotApi) {
 		batchNumber = 0,
 		batchSize,
 		collectionMetadata,
-		conditions,
+		conditions
 	} = bot.loadRequest
 	const queryParams = {} as Record<string, FieldValue>
 	if (typeof batchSize === "number" && batchSize > 0) {
 		// SmartSheet pagination uses 1-based indexing
-		queryParams["page"] = batchNumber + 1
-		queryParams["pageSize"] = batchSize
+		queryParams.page = batchNumber + 1
+		queryParams.pageSize = batchSize
 	} else {
-		queryParams["includeAll"] = true
+		queryParams.includeAll = true
 	}
 
 	// Transform Conditions on the Uesio Core Id into row Id filters
@@ -42,25 +42,24 @@ export default function smartsheet_load(bot: LoadBotApi) {
 	)
 	if (rowIdCondition) {
 		if (rowIdCondition.operator === "IN" && rowIdCondition.values?.length) {
-			queryParams["rowIds"] = rowIdCondition.values.join(",")
+			queryParams.rowIds = rowIdCondition.values.join(",")
 		} else if (rowIdCondition.operator === "EQ" && rowIdCondition.value) {
-			queryParams["rowIds"] = rowIdCondition.value
+			queryParams.rowIds = rowIdCondition.value
 		}
 	}
 
 	const queryString = Object.entries(queryParams)
-		.map(([key, value]) => {
-			return `${encodeURIComponent(key)}=${encodeURIComponent(
-				`${value}`
-			)}`
-		})
+		.map(
+			([key, value]) =>
+				`${encodeURIComponent(key)}=${encodeURIComponent(`${value}`)}`
+		)
 		.join("&")
 
 	const url = `https://api.smartsheet.com/2.0/sheets/${collectionMetadata.externalName}?${queryString}`
 
 	const response = bot.http.request({
 		method: "GET",
-		url,
+		url
 	})
 	const body = response.body as SheetResponse
 	const fieldsMetadata = collectionMetadata.getAllFieldMetadata()
@@ -74,7 +73,7 @@ export default function smartsheet_load(bot: LoadBotApi) {
 
 	body.rows.forEach((row) => {
 		const record: Record<string, FieldValue> = {
-			"uesio/core.id": row.id + "",
+			"uesio/core.id": row.id + ""
 		}
 
 		row.cells.forEach((cell) => {

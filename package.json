@@ -18,7 +18,7 @@
 		"lint": "nx lint",
 		"lint-all": "nx run-many --target=lint --all",
 		"nx": "nx",
-		"test": "nx test"
+		"test": "nx run-many --target=test --all"
 	},
 	"files": [],
 	"devDependencies": {

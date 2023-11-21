@@ -7,7 +7,8 @@
 		"lint-fix": "prettier --write . && eslint --fix -- bundle/**/*.ts*",
 		"lint": "prettier --check . && eslint -- bundle/**/*.ts* && tsc --project ./tsconfig.json --noEmit",
 		"push": "uesio pack && uesio deploy",
-		"pull": "uesio retrieve"
+		"pull": "uesio retrieve",
+		"test": "nx test"
 	},
 	"devDependencies": {
 		"@types/react": "^18.2.0",
