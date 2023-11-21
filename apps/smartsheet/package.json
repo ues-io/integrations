@@ -4,7 +4,8 @@
 	"description": "Smartsheet integration for Uesio",
 	"scripts": {
 		"build": "uesio pack",
-		"lint": "prettier --check . && eslint bundle/**/*.ts* && tsc --noEmit",
+		"lint": "prettier --check . && eslint **/*.ts* && tsc --noEmit --project ./tsconfig.json",
+		"lint-fix": "prettier --write . && eslint --fix -- **/*.ts*",
 		"push": "uesio pack && uesio workspace deploy",
 		"pull": "uesio workspace retrieve",
 		"publish": "uesio bundle create",

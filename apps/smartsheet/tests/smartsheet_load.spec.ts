@@ -7,14 +7,14 @@ const row1 = {
 		{
 			columnId: "taskname",
 			displayValue: "Test",
-			value: "Test"
+			value: "Test",
 		},
 		{
 			columnId: "taskstatus",
 			displayValue: "In Progress",
-			value: "in_progress"
-		}
-	]
+			value: "in_progress",
+		},
+	],
 }
 const row2 = {
 	id: 2,
@@ -22,14 +22,14 @@ const row2 = {
 		{
 			columnId: "taskname",
 			displayValue: "Another test",
-			value: "Another test"
+			value: "Another test",
 		},
 		{
 			columnId: "taskstatus",
 			displayValue: "Completed",
-			value: "completed"
-		}
-	]
+			value: "completed",
+		},
+	],
 }
 
 const getSampleCollectionMetadata = () => ({
@@ -38,24 +38,24 @@ const getSampleCollectionMetadata = () => ({
 		"uesio/smartsheet.name": {
 			externalName: "taskname",
 			name: "name",
-			namespace: "uesio/smartsheet"
+			namespace: "uesio/smartsheet",
 		},
 		"uesio/smartsheet.status": {
 			externalName: "taskstatus",
 			name: "status",
-			namespace: "uesio/smartsheet"
-		}
-	}))
+			namespace: "uesio/smartsheet",
+		},
+	})),
 })
 const uesioRow1 = {
 	"uesio/core.id": "1",
 	"uesio/smartsheet.name": "Test",
-	"uesio/smartsheet.status": "in_progress"
+	"uesio/smartsheet.status": "in_progress",
 }
 const uesioRow2 = {
 	"uesio/core.id": "2",
 	"uesio/smartsheet.name": "Another test",
-	"uesio/smartsheet.status": "completed"
+	"uesio/smartsheet.status": "completed",
 }
 
 describe("Smartsheet Load", () => {
@@ -63,17 +63,17 @@ describe("Smartsheet Load", () => {
 		const addRecord = jest.fn()
 		const bot = {
 			loadRequest: {
-				collectionMetadata: getSampleCollectionMetadata()
+				collectionMetadata: getSampleCollectionMetadata(),
 			},
 			addRecord,
 			http: {
 				request: jest.fn(() => ({
 					code: 200,
 					body: {
-						rows: [row1, row2]
-					}
-				}))
-			}
+						rows: [row1, row2],
+					},
+				})),
+			},
 		}
 
 		smartsheet_load(bot as unknown as LoadBotApi)
@@ -86,8 +86,8 @@ describe("Smartsheet Load", () => {
 		const request = jest.fn(() => ({
 			code: 200,
 			body: {
-				rows: [row1, row2]
-			}
+				rows: [row1, row2],
+			},
 		}))
 		const bot = {
 			loadRequest: {
@@ -98,14 +98,14 @@ describe("Smartsheet Load", () => {
 					{
 						field: "uesio/core.id",
 						operator: "IN",
-						values: ["1", "2"]
-					}
-				]
+						values: ["1", "2"],
+					},
+				],
 			},
 			addRecord,
 			http: {
-				request
-			}
+				request,
+			},
 		}
 
 		smartsheet_load(bot as unknown as LoadBotApi)
@@ -115,7 +115,7 @@ describe("Smartsheet Load", () => {
 
 		expect(request).toHaveBeenCalledWith({
 			method: "GET",
-			url: "https://api.smartsheet.com/2.0/sheets/somesheetid?page=1&pageSize=1&rowIds=1%2C2"
+			url: "https://api.smartsheet.com/2.0/sheets/somesheetid?page=1&pageSize=1&rowIds=1%2C2",
 		})
 	})
 	it("should only return one row from a sheet if uesio/core.id condition exists (single-value)", () => {
@@ -123,8 +123,8 @@ describe("Smartsheet Load", () => {
 		const request = jest.fn(() => ({
 			code: 200,
 			body: {
-				rows: [row2]
-			}
+				rows: [row2],
+			},
 		}))
 		const bot = {
 			loadRequest: {
@@ -135,14 +135,14 @@ describe("Smartsheet Load", () => {
 					{
 						field: "uesio/core.id",
 						operator: "EQ",
-						value: "2"
-					}
-				]
+						value: "2",
+					},
+				],
 			},
 			addRecord,
 			http: {
-				request
-			}
+				request,
+			},
 		}
 
 		smartsheet_load(bot as unknown as LoadBotApi)
@@ -151,7 +151,7 @@ describe("Smartsheet Load", () => {
 
 		expect(request).toHaveBeenCalledWith({
 			method: "GET",
-			url: "https://api.smartsheet.com/2.0/sheets/somesheetid?page=1&pageSize=1&rowIds=2"
+			url: "https://api.smartsheet.com/2.0/sheets/somesheetid?page=1&pageSize=1&rowIds=2",
 		})
 	})
 })

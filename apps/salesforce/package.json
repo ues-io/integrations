@@ -4,8 +4,8 @@
 	"description": "Salesforce integration for Uesio",
 	"scripts": {
 		"build": "uesio pack",
-		"lint-fix": "prettier --write . && eslint --fix -- bundle/**/*.ts*",
-		"lint": "prettier --check . && eslint -- bundle/**/*.ts* && tsc --project ./tsconfig.json --noEmit",
+		"lint-fix": "prettier --write . && eslint --fix -- **/*.ts*",
+		"lint": "prettier --check . && eslint -- **/*.ts* && tsc --project ./tsconfig.json --noEmit",
 		"push": "uesio pack && uesio deploy",
 		"pull": "uesio retrieve",
 		"test": "nx test"

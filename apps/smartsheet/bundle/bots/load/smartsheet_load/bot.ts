@@ -25,7 +25,7 @@ export default function smartsheet_load(bot: LoadBotApi) {
 		batchNumber = 0,
 		batchSize,
 		collectionMetadata,
-		conditions
+		conditions,
 	} = bot.loadRequest
 	const queryParams = {} as Record<string, FieldValue>
 	if (typeof batchSize === "number" && batchSize > 0) {
@@ -59,7 +59,7 @@ export default function smartsheet_load(bot: LoadBotApi) {
 
 	const response = bot.http.request({
 		method: "GET",
-		url
+		url,
 	})
 	const body = response.body as SheetResponse
 	const fieldsMetadata = collectionMetadata.getAllFieldMetadata()
@@ -73,7 +73,7 @@ export default function smartsheet_load(bot: LoadBotApi) {
 
 	body.rows.forEach((row) => {
 		const record: Record<string, FieldValue> = {
-			"uesio/core.id": row.id + ""
+			"uesio/core.id": row.id + "",
 		}
 
 		row.cells.forEach((cell) => {
