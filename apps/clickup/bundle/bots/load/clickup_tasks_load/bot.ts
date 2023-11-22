@@ -163,9 +163,15 @@ export default function clickup_tasks_load(bot: LoadBotApi) {
 	})
 
 	if (result.code === 200) {
-		;(result.body as TasksResponse).tasks.forEach((item) => {
-			bot.addRecord(getUesioItemFromExternalRecord(item))
-		})
+		listId
+			? (result.body as TasksResponse).tasks.forEach((item) => {
+					bot.addRecord(getUesioItemFromExternalRecord(item))
+			  })
+			: bot.addRecord(
+					getUesioItemFromExternalRecord(
+						result.body as Record<string, FieldValue>
+					)
+			  )
 	} else {
 		const resultBody = JSON.stringify(result.body)
 		bot.log.error(
