@@ -8,7 +8,8 @@
 		"lint": "prettier --check . && eslint -- bundle/**/*.ts* && tsc --project ./tsconfig.json --noEmit",
 		"push": "uesio pack && uesio deploy",
 		"pull": "uesio retrieve",
-		"publish": "uesio bundle create"
+		"publish": "uesio bundle create",
+		"test": "echo \"no tests yet\""
 	},
 	"devDependencies": {
 		"@types/react": "^18.2.0",
