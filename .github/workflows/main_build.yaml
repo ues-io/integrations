@@ -53,6 +53,7 @@ jobs:
             cd $dir
             npm ci
             npm run lint
+            npm run test
             cd - >> /dev/null
           done
       - name: Package each modified app

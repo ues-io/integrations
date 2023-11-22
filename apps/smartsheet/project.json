@@ -1,7 +1,7 @@
 {
-	"name": "salesforce",
+	"name": "smartsheet",
 	"$schema": "../../node_modules/nx/schemas/project-schema.json",
-	"sourceRoot": "apps/salesforce/bundle",
+	"sourceRoot": "apps/smartsheet",
 	"projectType": "library",
 	"generators": {},
 	"targets": {
@@ -14,29 +14,29 @@
 					"npx tsc --noEmit --project ./tsconfig.json"
 				],
 				"parallel": false,
-				"cwd": "apps/salesforce"
+				"cwd": "apps/smartsheet"
 			}
 		},
 		"watch": {
 			"executor": "nx:run-commands",
 			"options": {
 				"command": "uesio pack -w",
-				"cwd": "apps/salesforce"
+				"cwd": "apps/smartsheet"
 			}
 		},
 		"lint": {
 			"executor": "@nx/linter:eslint",
 			"options": {
-				"cwd": "apps/salesforce",
+				"cwd": "apps/smartsheet",
 				"lintFilePatterns": ["**/*.ts*"]
 			}
 		},
 		"test": {
 			"executor": "@nx/jest:jest",
 			"options": {
-				"jestConfig": "apps/salesforce/jest.config.ts"
+				"jestConfig": "apps/smartsheet/jest.config.ts"
 			},
-			"outputs": ["{workspaceRoot}/coverage/apps/salesforce"]
+			"outputs": ["{workspaceRoot}/coverage/apps/smartsheet"]
 		}
 	},
 	"tags": [],
