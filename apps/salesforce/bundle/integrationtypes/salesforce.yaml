@@ -1,4 +1,4 @@
 name: salesforce
+public: true
 loadBot: salesforce_load
 saveBot: salesforce_save
-public: true

@@ -26,7 +26,7 @@ type CompositeResponse = {
 }
 
 export default function salesforce_save(bot: SaveBotApi) {
-	const { collectionMetadata } = bot.saveRequest
+	const { collection, collectionMetadata } = bot.saveRequest
 	const servicesPath = `/services/data/v59.0`
 	const sobjectPath = `${servicesPath}/sobjects/${collectionMetadata.externalName}`
 	const { baseUrl } = bot.getCredentials()
@@ -37,33 +37,39 @@ export default function salesforce_save(bot: SaveBotApi) {
 	const compositePath = `${baseUrl}${servicesPath}/composite`
 
 	// Build maps for quickly converting to/from Salesforce/Uesio field names
-	const uesioFieldsBySalesforceName = {
+	const defaultUesioFieldsBySalesforceName = {
 		Id: "uesio/core.id",
 		// Defaults - these can be overridden
 		Name: "uesio/core.uniquekey",
 		CreatedDate: "uesio/core.createdat",
 		LastModifiedDate: "uesio/core.updatedat",
 	} as Record<string, string>
-	Object.entries(collectionMetadata.getAllFieldMetadata()).forEach(
-		([uesioFieldName, fieldMetadata]) => {
-			// Only expose fields that have a defined external field name
-			bot.log.info(
-				"uesioFieldName: " +
-					uesioFieldName +
-					", fieldMetadata external name: " +
-					fieldMetadata.externalName +
-					", name: " +
-					fieldMetadata.name
-			)
-			if (fieldMetadata.externalName) {
-				uesioFieldsBySalesforceName[fieldMetadata.externalName] =
-					uesioFieldName
+	const getUesioFieldBySalesforceName = (
+		collectionKey: string,
+		sfName: string
+	) => {
+		const collection = bot.getCollectionMetadata(collectionKey)
+		if (collection) {
+			const fieldId = collection.getFieldIdByExternalName(sfName)
+			if (fieldId) {
+				return fieldId
 			}
 		}
-	)
+		return defaultUesioFieldsBySalesforceName[sfName]
+	}
+	// Given a Salesforce Reference field id, e.g. "Job__c" or "AccountId",
+	// return the relationship name, e.g. "Job__r" or "Account"
+	const getRelationshipName = (sfField: string) =>
+		sfField.includes("__c")
+			? // Ignore more complex custom field extensions, just support __c for now.
+			  sfField.split("__c")[0] + "__r"
+			: // Strip off the "Id" suffix, e.g. "AccountId" => "Account"
+			  // which is pretty standard for "standard" SF Fields, but yeah it's a hack.
+			  // Ideally we'd have the full SF field DescribeFieldResult and use that.
+			  sfField.substring(0, sfField.length - 2)
 	// Invert the map
-	const salesforceFieldsByUesioName = Object.entries(
-		uesioFieldsBySalesforceName
+	const defaultSFFieldsByUesioName = Object.entries(
+		defaultUesioFieldsBySalesforceName
 	).reduce((acc, entry) => {
 		const [sfField, uesioField] = entry
 		acc[uesioField] = sfField
@@ -72,22 +78,48 @@ export default function salesforce_save(bot: SaveBotApi) {
 	}, {} as Record<string, string>)
 
 	const createUesioItemFromSalesforceRecord = (
-		record: Record<string, FieldValue>
+		record: Record<string, FieldValue>,
+		collectionName = collection
 	) =>
 		Object.entries(record).reduce(
 			(acc: Record<string, FieldValue>, [sfField, value]) => {
 				// Ignore special fields
 				if (sfField === "attributes") return acc
-				const uesioName = uesioFieldsBySalesforceName[sfField]
+				const uesioName = getUesioFieldBySalesforceName(
+					collectionName,
+					sfField
+				)
 				if (!uesioName) {
 					return acc
 				}
 				const fieldMetadata =
 					collectionMetadata.getFieldMetadata(uesioName)
-
-				if (fieldMetadata && fieldMetadata.type === "TIMESTAMP") {
-					value = Date.parse(value as string) / 1000
+				if (fieldMetadata) {
+					if (fieldMetadata.type === "TIMESTAMP") {
+						value = Date.parse(value as string) / 1000
+					} else if (fieldMetadata.type === "REFERENCE") {
+						const relName = getRelationshipName(sfField)
+						const refCollection = fieldMetadata
+							.getReferenceMetadata()
+							?.getCollection()
+						const relObject = record[relName] as Record<
+							string,
+							FieldValue
+						>
+						// We need to build an object containing the uesio/core.id field,
+						// along with any other name / unique key fields we already have
+						value = {
+							...(relObject
+								? createUesioItemFromSalesforceRecord(
+										relObject,
+										refCollection
+								  )
+								: {}),
+							"uesio/core.id": value,
+						}
+					}
 				}
+
 				acc[uesioName] = value
 				// bot.log.info(
 				// 	"sfField: " +
@@ -110,12 +142,14 @@ export default function salesforce_save(bot: SaveBotApi) {
 	) =>
 		Object.entries(uesioRecord).reduce(
 			(acc: Record<string, FieldValue>, [uesioField, value]) => {
-				const sfName = salesforceFieldsByUesioName[uesioField]
+				const fieldMetadata =
+					collectionMetadata.getFieldMetadata(uesioField)
+				const sfName =
+					fieldMetadata.getExternalFieldName() ||
+					defaultSFFieldsByUesioName[uesioField]
 				if (!sfName) {
 					return acc
 				}
-				const fieldMetadata =
-					collectionMetadata.getFieldMetadata(uesioField)
 				if (
 					sfName === "Id" ||
 					(isUpdate && !fieldMetadata.updateable) ||
@@ -123,9 +157,20 @@ export default function salesforce_save(bot: SaveBotApi) {
 				) {
 					return acc
 				}
-				if (fieldMetadata && fieldMetadata.type === "TIMESTAMP") {
-					value = new Date(value as number).toISOString()
+				if (fieldMetadata) {
+					if (fieldMetadata.type === "TIMESTAMP") {
+						value = new Date(value as number).toISOString()
+					} else if (fieldMetadata.type === "REFERENCE") {
+						bot.log.info(
+							"*** GOT REFERENCE FIELD to save, value is",
+							value
+						)
+						value = (value as Record<string, string>)[
+							"uesio/core.id"
+						]
+					}
 				}
+
 				acc[sfName] = value
 				// bot.log.info(
 				// 	"sfField: " +
@@ -261,10 +306,10 @@ export default function salesforce_save(bot: SaveBotApi) {
 	const responseBody = response.body as CompositeResponse
 	const resultsMap = {} as Record<string, SubrequestResult>
 	responseBody.compositeResponse.forEach((subResult) => {
-		bot.log.info("subResult", subResult)
+		// bot.log.info("subResult", subResult)
 		resultsMap[subResult.referenceId] = subResult
 	})
-	bot.log.info("resultsMap", resultsMap)
+	// bot.log.info("resultsMap", resultsMap)
 	// Now loop over our original requests again and record the results
 	bot.deletes.get().forEach((deleteApi) => {
 		const result = resultsMap[getDeleteRefId(deleteApi.getId())]
@@ -281,6 +326,7 @@ export default function salesforce_save(bot: SaveBotApi) {
 			const queryResult =
 				resultsMap[getInsertQueryRefId(insertApi.getId())]
 			if (queryResult) {
+				bot.log.info("Got insert query result", queryResult.body)
 				const record = createUesioItemFromSalesforceRecord(
 					queryResult.body as Record<string, FieldValue>
 				)
@@ -297,9 +343,12 @@ export default function salesforce_save(bot: SaveBotApi) {
 			const queryResult =
 				resultsMap[getUpdateQueryRefId(updateApi.getId())]
 			if (queryResult) {
+				bot.log.info("Got update query result", queryResult.body)
 				const record = createUesioItemFromSalesforceRecord(
 					queryResult.body as Record<string, FieldValue>
 				)
+				bot.log.info("Existing update API - getAll", updateApi.getAll())
+				bot.log.info("Resultant uesio record", record)
 				updateApi.setAll(record)
 			}
 		}

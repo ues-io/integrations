@@ -17,6 +17,7 @@ export default function salesforce_load(bot: LoadBotApi) {
 		batchNumber = 0,
 		batchSize = 100,
 		collectionMetadata,
+		collection,
 		conditions,
 		fields,
 		order,
@@ -30,62 +31,95 @@ export default function salesforce_load(bot: LoadBotApi) {
 
 	const soqlPath = "/services/data/v59.0/query/?q="
 
-	// Build maps for quickly converting to/from Salesforce/Uesio field names
-	const uesioFieldsBySalesforceName = {
+	const defaultUesioFieldsBySFName = {
 		Id: "uesio/core.id",
 		// Defaults - these can be overridden
 		Name: "uesio/core.uniquekey",
 		CreatedDate: "uesio/core.createdat",
 		LastModifiedDate: "uesio/core.updatedat",
 	} as Record<string, string>
-	Object.entries(collectionMetadata.getAllFieldMetadata()).forEach(
-		([uesioFieldName, fieldMetadata]) => {
-			// Only expose fields that have a defined external field name
-			// bot.log.info(
-			// 	"uesioFieldName: " +
-			// 		uesioFieldName +
-			// 		", fieldMetadata external name: " +
-			// 		fieldMetadata.externalName +
-			// 		", name: " +
-			// 		fieldMetadata.name
-			// )
-			if (fieldMetadata.externalName) {
-				uesioFieldsBySalesforceName[fieldMetadata.externalName] =
-					uesioFieldName
+	const defaultSFFieldsByUesioName = Object.entries(
+		defaultUesioFieldsBySFName
+	).reduce(
+		(acc: Record<string, string>, [sfName, uesioName]) => ({
+			...acc,
+			[uesioName]: sfName,
+		}),
+		{}
+	)
+	// Given a Salesforce Reference field id, e.g. "Job__c" or "AccountId",
+	// return the relationship name, e.g. "Job__r" or "Account"
+	const getRelationshipName = (sfField: string) =>
+		sfField.includes("__c")
+			? // Ignore more complex custom field extensions, just support __c for now.
+			  sfField.split("__c")[0] + "__r"
+			: // Strip off the "Id" suffix, e.g. "AccountId" => "Account"
+			  // which is pretty standard for "standard" SF Fields, but yeah it's a hack.
+			  // Ideally we'd have the full SF field DescribeFieldResult and use that.
+			  sfField.substring(0, sfField.length - 2)
+
+	const getUesioFieldBySalesforceName = (
+		collectionKey: string,
+		sfName: string
+	) => {
+		const collection = bot.getCollectionMetadata(collectionKey)
+		if (collection) {
+			const fieldId = collection.getFieldIdByExternalName(sfName)
+			if (fieldId) {
+				return fieldId
 			}
 		}
-	)
-	// Invert the map
-	const salesforceFieldsByUesioName = Object.entries(
-		uesioFieldsBySalesforceName
-	).reduce((acc, entry) => {
-		const [sfField, uesioField] = entry
-		acc[uesioField] = sfField
-		// bot.log.info("UESIO FIELD: " + uesioField + ", SF FIELD: " + sfField)
-		return acc
-	}, {} as Record<string, string>)
-
+		// Use defaults as a last resort
+		return defaultUesioFieldsBySFName[sfName]
+	}
 	const createUesioItemFromSalesforceRecord = (
-		record: Record<string, FieldValue>
+		record: Record<string, FieldValue>,
+		collectionName = collection
 	) =>
 		Object.entries(record).reduce(
 			(acc: Record<string, FieldValue>, [sfField, value]) => {
 				// Ignore special fields
 				if (sfField === "attributes") return acc
-				const uesioName = uesioFieldsBySalesforceName[sfField]
+				const uesioName = getUesioFieldBySalesforceName(
+					collectionName,
+					sfField
+				)
 				if (!uesioName) return acc
 				if (value !== null && value !== undefined) {
 					const fieldMetadata =
 						collectionMetadata.getFieldMetadata(uesioName)
-					if (fieldMetadata && fieldMetadata.type === "TIMESTAMP") {
-						// bot.log.info("sf TIMESTAMP value: " + value)
-						const dateValue = Date.parse(value as string)
-						if (dateValue) {
-							value = dateValue / 1000
-						} else {
-							value = null
+					if (fieldMetadata) {
+						if (fieldMetadata.type === "TIMESTAMP") {
+							// bot.log.info("sf TIMESTAMP value: " + value)
+							const dateValue = Date.parse(value as string)
+							if (dateValue) {
+								value = dateValue / 1000
+							} else {
+								value = null
+							}
+							// bot.log.info("UESIO TIMESTAMP value: " + value)
+						} else if (fieldMetadata.type === "REFERENCE") {
+							const relName = getRelationshipName(sfField)
+							const refCollection = fieldMetadata
+								.getReferenceMetadata()
+								?.getCollection()
+							const relObject = record[relName] as Record<
+								string,
+								FieldValue
+							>
+							// We need to build an object containing the uesio/core.id field,
+							// along with any other name / unique key fields we already have
+							value = {
+								...(relObject
+									? createUesioItemFromSalesforceRecord(
+											relObject,
+											refCollection
+									  )
+									: {}),
+								"uesio/core.id": value,
+							}
+							// TODO: Support multi-collection reference fields
 						}
-						// bot.log.info("UESIO TIMESTAMP value: " + value)
 					}
 				}
 				acc[uesioName] = value
@@ -127,21 +161,56 @@ export default function salesforce_load(bot: LoadBotApi) {
 
 	const parseFieldRequests = (
 		fields: FieldRequest[],
-		fieldsSet = new Set()
+		fieldsSet = new Set(["Id"]),
+		collectionName = collection,
+		fieldIdPrefix = ""
 	) => {
+		// ALWAYS request the Id field
 		if (fields && fields.length) {
+			const collectionMeta = bot.getCollectionMetadata(collectionName)
 			fields.forEach((f) => {
-				const sfFieldName = salesforceFieldsByUesioName[f.id]
-				// bot.log.info("uesio field id: " + f.id + ", sf field: " + sfFieldName)
-				fieldsSet.add(sfFieldName)
-				if (f.fields && f.fields.length) {
-					parseFieldRequests(f.fields, fieldsSet)
+				const fieldMetadata = collectionMeta.getFieldMetadata(f.id)
+				const sfFieldName = fieldMetadata
+					? fieldMetadata.externalName
+					: defaultSFFieldsByUesioName[f.id]
+				if (sfFieldName) {
+					// bot.log.info("uesio field id: " + f.id + ", sf field: " + sfFieldName)
+					fieldsSet.add(`${fieldIdPrefix}${sfFieldName}`)
+					if (f.fields && f.fields.length) {
+						// If this is a Reference field, we need to populate the reference prefix,
+						// and we need to use the related collection's field metadata
+						const refMetadata =
+							fieldMetadata?.getReferenceMetadata()
+						if (refMetadata && refMetadata.getCollection()) {
+							const newRefPrefix =
+								fieldIdPrefix +
+								getRelationshipName(sfFieldName) +
+								"."
+							// Make sure that the Id field is requested on the Reference field load.
+							// The specific "Name" field should be requested by the user.
+							fieldsSet.add(`${newRefPrefix}Id`)
+							parseFieldRequests(
+								f.fields,
+								fieldsSet,
+								refMetadata?.getCollection(),
+								newRefPrefix
+							)
+						} else {
+							parseFieldRequests(
+								f.fields,
+								fieldsSet,
+								collectionName,
+								fieldIdPrefix
+							)
+						}
+					}
 				}
 			})
-			return Array.from(fieldsSet.keys()).filter((f) => !!f)
 		} else {
-			return ["Id", "Name"]
+			// If no other fields requested, add "Name"
+			fieldsSet.add("Name")
 		}
+		return Array.from(fieldsSet.keys()).filter((f) => !!f)
 	}
 	const escapeSingleQuotes = (value: string) => value.replace(/'/g, "\\'")
 	const unquotedFieldTypes = ["NUMBER", "CHECKBOX"]
@@ -160,7 +229,7 @@ export default function salesforce_load(bot: LoadBotApi) {
 			type,
 			operator,
 		} = c
-		const sfFieldName = salesforceFieldsByUesioName[field]
+		const sfFieldName = collectionMetadata.getExternalFieldName(field)
 		const metadata = field
 			? collectionMetadata.getFieldMetadata(field)
 			: undefined
@@ -175,11 +244,13 @@ export default function salesforce_load(bot: LoadBotApi) {
 		if (type === "SEARCH") {
 			// Implement a simple search by doing a LIKE on all fields provided
 			return (fields || [])
+				.map((f) => collectionMetadata.getExternalFieldName(f))
+				.filter((f) => !!f)
 				.map(
-					(f) =>
-						`${
-							salesforceFieldsByUesioName[f]
-						} LIKE '%${escapeSingleQuotes(value as string)}%'`
+					(sfField) =>
+						`${sfField} LIKE '%${escapeSingleQuotes(
+							value as string
+						)}%'`
 				)
 				.join(" OR ")
 		} else if (type === "GROUP") {
@@ -206,12 +277,12 @@ export default function salesforce_load(bot: LoadBotApi) {
 		`(${conditions.map(parseCondition).join(`) ${conjunction} (`)})`
 	const parseOrders = (orders: LoadOrder[]) =>
 		orders
-			.map(
-				(order) =>
-					`${salesforceFieldsByUesioName[order.field]} ${
-						order.desc ? "DESC" : "ASC"
-					}`
-			)
+			.map((order) => [
+				collectionMetadata.getExternalFieldName(order.field),
+				order.desc,
+			])
+			.filter(([f]) => !!f)
+			.map(([sfField, desc]) => `${sfField} ${desc ? "DESC" : "ASC"}`)
 			.join(", ")
 	const clauses = ["SELECT"]
 	if (fields && fields.length) {
@@ -249,7 +320,8 @@ export default function salesforce_load(bot: LoadBotApi) {
 		"Response from salesforce: " +
 			response.code +
 			", status=" +
-			response.status
+			response.status,
+		response.body
 	)
 	if (response.code !== 200) {
 		let errMessage = ""

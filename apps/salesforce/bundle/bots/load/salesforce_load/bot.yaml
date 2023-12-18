@@ -1,4 +1,4 @@
 name: salesforce_load
+public: true
 type: LOAD
 dialect: TYPESCRIPT
-public: true

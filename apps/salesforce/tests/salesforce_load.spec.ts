@@ -14,6 +14,8 @@ const sfRow2 = {
 const sfRow3 = {
 	Id: "001000010000100CCC",
 	Name: "Some other channel account",
+	ParentId: "001000010000100AAA",
+	Parent: { ...sfRow1 },
 	Type: "Customer - Channel",
 }
 const uesioRow1 = {
@@ -25,6 +27,15 @@ const uesioRow2 = {
 	"uesio/core.id": "001000010000100ABC",
 	"luigi/foo.name": "United Oil & Gas, UK",
 	"luigi/foo.type": "Customer - Partner",
+}
+const uesioRow3 = {
+	"uesio/core.id": "001000010000100CCC",
+	"luigi/foo.name": "United Oil & Gas, UK",
+	"luigi/foo.type": "Customer - Partner",
+	"luigi/foo.parent": {
+		"uesio/core.id": "001000010000100AAA",
+		"luigi/foo.name": "Genepoint",
+	},
 }
 
 const nameFieldMetadata = {
@@ -38,6 +49,15 @@ const typeFieldMetadata = {
 	name: "type",
 	type: "TEXT",
 	namespace: "luigi/foo",
+}
+const parentFieldMetadata = {
+	externalName: "ParentId",
+	name: "Parent",
+	type: "REFERENCE",
+	namespace: "luigi/foo",
+	reference: {
+		collection: "luigi/foo.account",
+	},
 }
 const coreIdFieldMetadata = {
 	externalName: "Id",
@@ -56,6 +76,7 @@ const getSampleCollectionMetadata = () => ({
 	getAllFieldMetadata: jest.fn(() => ({
 		"luigi/foo.name": nameFieldMetadata,
 		"luigi/foo.type": typeFieldMetadata,
+		"luigi/foo.parent": parentFieldMetadata,
 		"uesio/core.id": coreIdFieldMetadata,
 	})),
 	getFieldMetadata: jest.fn((fieldName) => {
@@ -64,6 +85,8 @@ const getSampleCollectionMetadata = () => ({
 				return nameFieldMetadata
 			case "luigi/foo.type":
 				return typeFieldMetadata
+			case "luigi/foo.parent":
+				return parentFieldMetadata
 			case "uesio/core.id":
 				return coreIdFieldMetadata
 			default:
@@ -147,6 +170,51 @@ describe("Salesforce Load", () => {
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow1)
 		expect(bot.addRecord).toHaveBeenCalledTimes(1)
 		expect(bot.setHasMoreRecords).toHaveBeenCalledTimes(1)
+		expect(bot.http.request).toHaveBeenCalledWith({
+			method: "GET",
+			url:
+				baseUrl +
+				"/services/data/v59.0/query/?q=SELECT%20Name%2C%20Type%2C%20Id%20FROM%20Account%20WHERE%20((Type%20%3D%20'Customer%20-%20Channel'))%20LIMIT%202",
+		})
+	})
+	it("should load reference fields", () => {
+		const bot = mockBot([sfRow3], {
+			fields: [
+				{
+					id: "luigi/foo.name",
+				},
+				{
+					id: "luigi/foo.type",
+				},
+				{
+					id: "luigi/foo.parent",
+					fields: [
+						{
+							id: "luigi/foo.name",
+						},
+						{
+							id: "uesio/core.id",
+						},
+					],
+				},
+				{
+					id: "uesio/core.id",
+				},
+			],
+			conditions: [
+				{
+					field: "luigi/foo.parent",
+					operator: "IS_NOT_BLANK",
+				},
+			],
+			batchSize: 1,
+			batchNumber: 0,
+		})
+
+		salesforce_load(bot as unknown as LoadBotApi)
+
+		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow3)
+		expect(bot.addRecord).toHaveBeenCalledTimes(1)
 		expect(bot.http.request).toHaveBeenCalledWith({
 			method: "GET",
 			url:
