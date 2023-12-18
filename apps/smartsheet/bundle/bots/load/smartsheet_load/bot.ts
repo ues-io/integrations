@@ -17,7 +17,7 @@ type SheetRow = {
 
 type SheetResponse = {
 	columns: SheetColumn[]
-	rows: SheetRow[]
+	rows: SheetRow[] | undefined
 }
 
 export default function smartsheet_load(bot: LoadBotApi) {
@@ -76,7 +76,7 @@ export default function smartsheet_load(bot: LoadBotApi) {
 	const maxRecordForPagination = doPagination
 		? (queryParams.pageSize as number) - 1
 		: -1
-	body.rows.forEach((row, i) => {
+	body.rows?.forEach((row, i) => {
 		// If we are on the final row, do NOT add it to the bot's records,
 		// since we requested one more than we needed, but DO set has more records
 		// so that Uesio pagination controls will work
@@ -88,7 +88,7 @@ export default function smartsheet_load(bot: LoadBotApi) {
 			"uesio/core.id": row.id + "",
 		}
 
-		row.cells.forEach((cell) => {
+		row.cells?.forEach((cell) => {
 			const field = fields[cell.columnId]
 			if (field) {
 				record[field.namespace + "." + field.name] = cell.value

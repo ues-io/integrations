@@ -4,7 +4,7 @@ import smartsheet_load from "../bundle/bots/load/smartsheet_load/bot"
 const sampleUesioCollectionName = "tasks"
 const sampleUesioNS = "luigi/foo"
 const mockBot = (
-	returnRecords: Record<string, FieldValue>[],
+	returnRecords?: Record<string, FieldValue>[],
 	loadRequest?: Partial<LoadRequestMetadata>
 ) => ({
 	loadRequest: {
@@ -90,6 +90,20 @@ describe("Smartsheet Load", () => {
 		smartsheet_load(bot as unknown as LoadBotApi)
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow1)
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow2)
+	})
+	it("should not bomb if no rows or cells are returned", () => {
+		let bot = mockBot(undefined)
+		smartsheet_load(bot as unknown as LoadBotApi)
+		expect(bot.addRecord).toHaveBeenCalledTimes(0)
+		bot = mockBot([
+			{
+				id: "123",
+			},
+		])
+		smartsheet_load(bot as unknown as LoadBotApi)
+		expect(bot.addRecord).toHaveBeenCalledWith({
+			"uesio/core.id": "123",
+		})
 	})
 	it("should only return specific rows from a sheet if uesio/core.id condition exists (multi-value)", () => {
 		const bot = mockBot([row1, row2], {
