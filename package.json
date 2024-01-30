@@ -23,7 +23,7 @@
 	"files": [],
 	"devDependencies": {
 		"@nx/eslint-plugin": "16.10.0",
-		"@nx/jest": "^16.10.0",
+		"@nx/jest": "^17.3.0",
 		"@nx/linter": "16.10.0",
 		"@types/jest": "^29.5.9",
 		"@types/react": "^17.0.38",
