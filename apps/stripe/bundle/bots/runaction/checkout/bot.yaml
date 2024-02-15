@@ -1,0 +1,17 @@
+name: checkout
+public: true
+type: RUNACTION
+dialect: TYPESCRIPT
+params:
+  - name: successURL
+    label: Success URL
+    type: TEXT
+    required: true
+  - name: items
+    label: Items
+    type: LIST
+    required: true
+  - name: mode
+    type: TEXT
+    required: true
+    selectList: mode
