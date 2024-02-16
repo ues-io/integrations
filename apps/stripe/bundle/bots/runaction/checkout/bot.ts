@@ -1,9 +1,6 @@
 import { RunActionBotApi } from "@uesio/bots"
 import { Params } from "@uesio/app/bots/runaction/uesio/stripe/checkout"
-
-// type OrderDetails = {
-// 	orderNumber: string
-// }
+import { Stripe } from "stripe"
 
 export default function checkout(bot: RunActionBotApi) {
 	const params = bot.params.getAll() as Params
@@ -17,17 +14,16 @@ export default function checkout(bot: RunActionBotApi) {
 
 	const baseURL = bot.getIntegration().getBaseURL()
 
-	bot.log.info("ITEMS", items)
-	bot.log.info("baseURL", baseURL)
-	bot.log.info("mode", mode)
-	bot.log.info("successURL", successURL)
-
 	const result = bot.http.request({
 		method: "POST",
 		url: baseURL + "/v1/checkout/sessions",
+		headers: {
+			"Content-Type": "application/x-www-form-urlencoded",
+		},
 		body: {
 			mode,
 			success_url: successURL,
+			items,
 		},
 	})
 	if (result.code !== 200) {
@@ -35,11 +31,7 @@ export default function checkout(bot: RunActionBotApi) {
 		return
 	}
 
-	bot.log.info("Result", result)
-	bot.log.info("Body", result.body)
+	const session = result.body as unknown as Stripe.Checkout.Session
 
-	// const orderDetails = result.body as OrderDetails
-	// const { orderNumber } = orderDetails
-
-	// bot.addResult("orderNumber", orderNumber)
+	bot.addResult("session", session.url)
 }
