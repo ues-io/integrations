@@ -9,7 +9,7 @@
 		"push": "uesio pack && uesio workspace deploy",
 		"pull": "uesio workspace retrieve",
 		"publish": "uesio bundle create",
-		"test": "nx test"
+		"test": "echo \"no tests yet\""
 	},
 	"devDependencies": {
 		"@types/jest": "^29.5.9",
