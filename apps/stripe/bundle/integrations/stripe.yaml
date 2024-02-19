@@ -1,0 +1,6 @@
+name: stripe
+public: true
+type: stripe
+authentication: API_KEY
+credentials: stripe_api_key
+baseUrl: https://api.stripe.com

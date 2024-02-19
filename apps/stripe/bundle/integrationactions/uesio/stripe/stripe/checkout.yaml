@@ -1,0 +1,4 @@
+name: checkout
+label: Get Checkout URL
+public: true
+bot: checkout

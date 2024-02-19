@@ -1,0 +1,44 @@
+{
+	"name": "stripe",
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"sourceRoot": "apps/stripe",
+	"projectType": "library",
+	"generators": {},
+	"targets": {
+		"build": {
+			"executor": "nx:run-commands",
+			"outputs": ["{projectRoot}/bundle/componentpacks/main/dist"],
+			"options": {
+				"commands": [
+					"uesio pack",
+					"npx tsc --noEmit --project ./tsconfig.json"
+				],
+				"parallel": false,
+				"cwd": "apps/stripe"
+			}
+		},
+		"watch": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "uesio pack -w",
+				"cwd": "apps/stripe"
+			}
+		},
+		"lint": {
+			"executor": "@nx/linter:eslint",
+			"options": {
+				"cwd": "apps/stripe",
+				"lintFilePatterns": ["**/*.ts*"]
+			}
+		},
+		"test": {
+			"executor": "@nx/jest:jest",
+			"options": {
+				"jestConfig": "apps/stripe/jest.config.ts"
+			},
+			"outputs": ["{workspaceRoot}/coverage/apps/stripe"]
+		}
+	},
+	"tags": [],
+	"implicitDependencies": []
+}
