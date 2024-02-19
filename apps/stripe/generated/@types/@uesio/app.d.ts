@@ -6,7 +6,7 @@ declare module "@uesio/app/bots/runaction/uesio/stripe/checkout" {
 
 	type Params = {
 		successURL: string
-		items: string[]
+		items: {price: string, quantity: number}[]
 		mode: string
 	}
 
