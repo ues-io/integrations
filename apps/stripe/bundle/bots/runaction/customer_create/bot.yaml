@@ -13,5 +13,5 @@ params:
     selectList: mode
   - name: metadata
     label: Set of key-value pairs
-    type: LIST
+    type: MAP
     required: true
