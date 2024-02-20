@@ -1,0 +1,17 @@
+name: customer_create
+public: true
+type: RUNACTION
+dialect: TYPESCRIPT
+params:
+  - name: uniquekey
+    label: Customer Uesio Unique Key
+    type: TEXT
+    required: true
+  - name: name
+    label: Customer full name
+    type: TEXT
+    required: true
+  - name: email
+    type: TEXT
+    required: true
+    selectList: mode

@@ -1,0 +1,4 @@
+name: customer_create
+label: Create a Customer Object
+public: true
+bot: customer_create
