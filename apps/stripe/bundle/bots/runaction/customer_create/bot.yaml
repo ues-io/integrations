@@ -3,10 +3,6 @@ public: true
 type: RUNACTION
 dialect: TYPESCRIPT
 params:
-  - name: uniquekey
-    label: Customer Uesio Unique Key
-    type: TEXT
-    required: true
   - name: name
     label: Customer full name
     type: TEXT
@@ -15,3 +11,7 @@ params:
     type: TEXT
     required: true
     selectList: mode
+  - name: metadata
+    label: Set of key-value pairs
+    type: LIST
+    required: true

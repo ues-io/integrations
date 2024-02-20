@@ -4,7 +4,7 @@ import { Stripe } from "stripe"
 
 export default function customer_create(bot: RunActionBotApi) {
 	const params = bot.params.getAll() as Params
-	const { uniquekey, name, email } = params
+	const { name, email, metadata } = params
 	const actionName = bot.getActionName()
 
 	if (actionName !== "customer_create") {
@@ -25,7 +25,7 @@ export default function customer_create(bot: RunActionBotApi) {
 		body: {
 			name,
 			email,
-			metadata: { "uesio/core.uniquekey": uniquekey },
+			metadata,
 		},
 	})
 

@@ -17,9 +17,9 @@ declare module "@uesio/app/bots/runaction/uesio/stripe/checkout" {
 declare module "@uesio/app/bots/runaction/uesio/stripe/customer_create" {
 
 	type Params = {
-		uniquekey: string
 		name: string
 		email: string
+		metadata: Record
 	}
 
 	export type {
