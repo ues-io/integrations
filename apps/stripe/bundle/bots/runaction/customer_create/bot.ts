@@ -30,7 +30,7 @@ export default function customer_create(bot: RunActionBotApi) {
 	})
 
 	if (result.code !== 200) {
-		bot.addError("could not complete customer creation: " + result.body)
+		bot.addError("could not complete customer creation: " + result.code)
 		return
 	}
 
