@@ -14,3 +14,15 @@ declare module "@uesio/app/bots/runaction/uesio/stripe/checkout" {
 		Params
 	}
 }
+declare module "@uesio/app/bots/runaction/uesio/stripe/customer_create" {
+
+	type Params = {
+		uniquekey: string
+		name: string
+		email: string
+	}
+
+	export type {
+		Params
+	}
+}
