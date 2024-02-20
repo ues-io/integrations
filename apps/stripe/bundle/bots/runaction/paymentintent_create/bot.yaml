@@ -1,0 +1,21 @@
+name: paymentintent_create
+public: true
+type: RUNACTION
+dialect: TYPESCRIPT
+params:
+  - name: amount
+    label: Amount
+    type: NUMBER
+    required: true
+  - name: currency
+    label: Currency
+    type: TEXT
+    required: true
+  - name: customer
+    label: Customer ID
+    type: TEXT
+    required: true
+  - name: paymentMethod
+    label: payment Method
+    type: TEXT
+    required: true

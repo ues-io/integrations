@@ -36,7 +36,7 @@ export default function checkout(bot: RunActionBotApi) {
 	})
 
 	if (result.code !== 200) {
-		bot.addError("could not complete checkout: " + result.body)
+		bot.addError("could not complete checkout: " + result.code)
 		return
 	}
 

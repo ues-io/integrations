@@ -1,0 +1,4 @@
+name: paymentintent_create
+label: Create a Payment Intent Object
+public: true
+bot: paymentintent_create
