@@ -1,4 +1,4 @@
-name: customer_create
+name: customer_search
 public: true
 type: RUNACTION
 dialect: TYPESCRIPT
@@ -6,12 +6,9 @@ params:
   - name: name
     label: Customer full name
     type: TEXT
-    required: true
   - name: email
     type: TEXT
-    required: true
     label: Email
   - name: metadata
     label: Set of key-value pairs
     type: MAP
-    required: true
