@@ -60,11 +60,8 @@ export default function customer_search(bot: RunActionBotApi) {
 		Stripe.CustomerSearchParams,
 		Stripe.Customer
 	>({
-		method: "POST",
+		method: "GET",
 		url: baseURL + "v1/customers/search",
-		headers: {
-			"Content-Type": "application/x-www-form-urlencoded",
-		},
 		body: {
 			query,
 		},
