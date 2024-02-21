@@ -10,7 +10,6 @@ declare module "@uesio/app/bots/runaction/uesio/stripe/checkout" {
 		customer: string
 		success_url: string
 		cancel_url: string
-		items: {price: string, quantity: number}[]
 	}
 
 	export type {
