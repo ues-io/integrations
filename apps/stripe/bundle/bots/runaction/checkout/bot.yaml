@@ -23,7 +23,3 @@ params:
     label: Cancel URL
     type: TEXT
     required: true
-  - name: items
-    label: Items
-    type: LIST
-    required: true
