@@ -15,11 +15,11 @@ params:
     label: Customer ID
     type: TEXT
     required: true
-  - name: successURL
+  - name: success_url
     label: Success URL
     type: TEXT
     required: true
-  - name: cancelURL
+  - name: cancel_url
     label: Cancel URL
     type: TEXT
     required: true
