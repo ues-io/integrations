@@ -13,58 +13,28 @@ export default function customer_search(bot: RunActionBotApi) {
 
 	const buildQueryString = (params: Params) => {
 		let query = ""
-
-		// Check for "name" param and escape single quotes as necessary
 		if (params.name) {
-			query += `name:${encodeURIComponent(
-				params.name.replace(/\\'/g, "'")
-			)}`
+			query += `name:"${params.name}"`
 		}
-
-		// Check for "email" param
 		if (params.email) {
-			query += query ? " AND " : "" // Add 'AND' only if previous condition was met
-			query += `email:${encodeURIComponent(params.email)}`
+			query += query ? " AND " : ""
+			query += `email:"${params.email}"`
 		}
-
-		// Check for "metadata" param and handle object structure for flexibility
-		// if (params.metadata) {
-		// 	query += query ? " AND " : "" // Add 'AND' only if previous conditions were met
-		// 	query += "metadata["
-
-		// 	// Handle various "metadata" structures:
-		// 	if (typeof params.metadata === "object") {
-		// 		for (const key in params.metadata) {
-		// 			if (params.metadata[key]) {
-		// 				query += `'${key}':${encodeURIComponent(
-		// 					params.metadata[key]
-		// 				)},`
-		// 			}
-		// 		}
-		// 		// Remove trailing comma from object query part
-		// 		query = query.slice(0, -1)
-		// 	} else {
-		// 		// Handle unexpected "metadata" types for robustness
-		// 		console.warn('Invalid "metadata" parameter. Ignoring.')
-		// 	}
-
-		// 	query += "]"
-		// }
+		if (params.uniquekey) {
+			query += query ? " AND " : ""
+			query += `metadata['uesio/core.uniquekey']:'${params.uniquekey}'`
+		}
 		return query
 	}
 
 	const query = buildQueryString(params)
-
 	const baseURL = bot.getIntegration().getBaseURL()
 	const result = bot.http.request<
 		Stripe.CustomerSearchParams,
 		Stripe.Customer
 	>({
 		method: "GET",
-		url: baseURL + "v1/customers/search",
-		body: {
-			query,
-		},
+		url: baseURL + `/v1/customers/search?query=${query}`,
 	})
 
 	if (result.code !== 200) {

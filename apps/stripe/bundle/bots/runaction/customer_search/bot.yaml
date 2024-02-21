@@ -11,7 +11,7 @@ params:
     label: Email
     type: TEXT
     required: false
-  - name: metadata
-    label: Set of key-value pairs
-    type: MAP
+  - name: uniquekey
+    label: UniqueKey
+    type: TEXT
     required: false

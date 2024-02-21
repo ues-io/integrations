@@ -31,7 +31,7 @@ declare module "@uesio/app/bots/runaction/uesio/stripe/customer_search" {
 	type Params = {
 		name?: string
 		email?: string
-		metadata?: unknown
+		uniquekey?: string
 	}
 
 	export type {
