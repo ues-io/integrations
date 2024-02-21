@@ -71,7 +71,7 @@ export default function customer_search(bot: RunActionBotApi) {
 	})
 
 	if (result.code !== 200) {
-		bot.addError("could not complete customer creation: " + result.code)
+		bot.addError("could not complete customer search: " + result.code)
 		return
 	}
 
