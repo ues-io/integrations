@@ -20,9 +20,9 @@ export default function customer_search(bot: RunActionBotApi) {
 			query += query ? " AND " : ""
 			query += `email:"${params.email}"`
 		}
-		if (params.uniquekey) {
+		if (params.metadata) {
 			query += query ? " AND " : ""
-			query += `metadata['uesio/core.uniquekey']:'${params.uniquekey}'`
+			query += params.metadata
 		}
 		return query
 	}

@@ -8,10 +8,10 @@ params:
     type: TEXT
     required: false
   - name: email
-    label: Email
+    label: Customer Email
     type: TEXT
     required: false
-  - name: uniquekey
-    label: UniqueKey
-    type: TEXT
+  - name: metadata
+    label: Customer Metadata
+    type: MAP
     required: false

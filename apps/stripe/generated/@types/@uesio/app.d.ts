@@ -5,9 +5,12 @@ declare module "@uesio/app/selectlists/uesio/stripe" {
 declare module "@uesio/app/bots/runaction/uesio/stripe/checkout" {
 
 	type Params = {
-		successURL: string
+		success_url: string
+		cancel_url: string
 		items: {price: string, quantity: number}[]
 		mode: string
+		customer: string
+		currency: string
 	}
 
 	export type {
@@ -31,7 +34,7 @@ declare module "@uesio/app/bots/runaction/uesio/stripe/customer_search" {
 	type Params = {
 		name?: string
 		email?: string
-		uniquekey?: string
+		metadata?: unknown
 	}
 
 	export type {

@@ -4,7 +4,8 @@ import { Stripe } from "stripe"
 
 export default function checkout(bot: RunActionBotApi) {
 	const params = bot.params.getAll() as Params
-	const { successURL, items } = params
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	const { currency, customer, success_url, cancel_url, items } = params
 	const actionName = bot.getActionName()
 	const mode = params.mode as Stripe.Checkout.SessionCreateParams.Mode
 
@@ -30,7 +31,10 @@ export default function checkout(bot: RunActionBotApi) {
 		},
 		body: {
 			mode,
-			success_url: successURL,
+			currency,
+			customer,
+			cancel_url,
+			success_url,
 			line_items: lineItems,
 		},
 	})

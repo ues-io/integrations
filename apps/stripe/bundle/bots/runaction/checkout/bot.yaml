@@ -3,15 +3,27 @@ public: true
 type: RUNACTION
 dialect: TYPESCRIPT
 params:
+  - name: mode
+    type: TEXT
+    required: true
+    selectList: mode
+  - name: currency
+    label: Currency
+    type: TEXT
+    required: true
+  - name: customer
+    label: Customer ID
+    type: TEXT
+    required: true
   - name: successURL
     label: Success URL
+    type: TEXT
+    required: true
+  - name: cancelURL
+    label: Cancel URL
     type: TEXT
     required: true
   - name: items
     label: Items
     type: LIST
     required: true
-  - name: mode
-    type: TEXT
-    required: true
-    selectList: mode
