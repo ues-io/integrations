@@ -5,12 +5,12 @@ declare module "@uesio/app/selectlists/uesio/stripe" {
 declare module "@uesio/app/bots/runaction/uesio/stripe/checkout" {
 
 	type Params = {
+		mode: string
+		currency: string
+		customer: string
 		success_url: string
 		cancel_url: string
 		items: {price: string, quantity: number}[]
-		mode: string
-		customer: string
-		currency: string
 	}
 
 	export type {
