@@ -19,7 +19,19 @@ declare module "@uesio/app/bots/runaction/uesio/stripe/customer_create" {
 	type Params = {
 		name: string
 		email: string
-		metadata: Record
+		metadata: unknown
+	}
+
+	export type {
+		Params
+	}
+}
+declare module "@uesio/app/bots/runaction/uesio/stripe/customer_search" {
+
+	type Params = {
+		name?: string
+		email?: string
+		metadata?: unknown
 	}
 
 	export type {

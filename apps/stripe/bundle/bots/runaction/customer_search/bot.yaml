@@ -6,9 +6,12 @@ params:
   - name: name
     label: Customer full name
     type: TEXT
+    required: false
   - name: email
-    type: TEXT
     label: Email
+    type: TEXT
+    required: false
   - name: metadata
     label: Set of key-value pairs
     type: MAP
+    required: false

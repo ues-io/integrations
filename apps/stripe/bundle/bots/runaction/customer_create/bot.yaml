@@ -8,9 +8,9 @@ params:
     type: TEXT
     required: true
   - name: email
+    label: Email
     type: TEXT
     required: true
-    label: Email
   - name: metadata
     label: Set of key-value pairs
     type: MAP
