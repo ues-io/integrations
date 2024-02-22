@@ -10,16 +10,20 @@ params:
   - name: currency
     label: Currency
     type: TEXT
-    required: true
+    required: false
   - name: customer
     label: Customer ID
     type: TEXT
-    required: true
+    required: false
   - name: success_url
     label: Success URL
     type: TEXT
-    required: true
+    required: false
   - name: cancel_url
     label: Cancel URL
     type: TEXT
-    required: true
+    required: false
+  - name: line_items
+    label: Line Items
+    type: MAP #TO-DO This must be a List of Struct using MAP so we got undefined type in typescript
+    required: false
