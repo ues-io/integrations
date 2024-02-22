@@ -6,11 +6,21 @@ declare module "@uesio/app/bots/runaction/uesio/stripe/checkout" {
 
 	type Params = {
 		mode: string
-		currency: string
-		customer: string
-		success_url: string
-		cancel_url: string
+		currency?: string
+		customer?: string
+		success_url?: string
+		cancel_url?: string
 		line_items?: unknown
+	}
+
+	export type {
+		Params
+	}
+}
+declare module "@uesio/app/bots/runaction/uesio/stripe/checkout_retrieve" {
+
+	type Params = {
+		id?: string
 	}
 
 	export type {
