@@ -20,7 +20,7 @@ declare module "@uesio/app/bots/runaction/uesio/stripe/checkout" {
 declare module "@uesio/app/bots/runaction/uesio/stripe/checkout_retrieve" {
 
 	type Params = {
-		id?: string
+		id: string
 	}
 
 	export type {
@@ -45,6 +45,16 @@ declare module "@uesio/app/bots/runaction/uesio/stripe/customer_search" {
 		name?: string
 		email?: string
 		metadata?: unknown
+	}
+
+	export type {
+		Params
+	}
+}
+declare module "@uesio/app/bots/runaction/uesio/stripe/subscription_retrieve" {
+
+	type Params = {
+		id: string
 	}
 
 	export type {
