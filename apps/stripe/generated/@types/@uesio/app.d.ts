@@ -5,9 +5,22 @@ declare module "@uesio/app/selectlists/uesio/stripe" {
 declare module "@uesio/app/bots/runaction/uesio/stripe/checkout" {
 
 	type Params = {
-		successURL: string
-		items: {price: string, quantity: number}[]
 		mode: string
+		currency?: string
+		customer?: string
+		success_url?: string
+		cancel_url?: string
+		line_items?: unknown
+	}
+
+	export type {
+		Params
+	}
+}
+declare module "@uesio/app/bots/runaction/uesio/stripe/checkout_retrieve" {
+
+	type Params = {
+		id: string
 	}
 
 	export type {
@@ -19,7 +32,29 @@ declare module "@uesio/app/bots/runaction/uesio/stripe/customer_create" {
 	type Params = {
 		name: string
 		email: string
-		metadata: Record
+		metadata: unknown
+	}
+
+	export type {
+		Params
+	}
+}
+declare module "@uesio/app/bots/runaction/uesio/stripe/customer_search" {
+
+	type Params = {
+		name?: string
+		email?: string
+		metadata?: unknown
+	}
+
+	export type {
+		Params
+	}
+}
+declare module "@uesio/app/bots/runaction/uesio/stripe/subscription_retrieve" {
+
+	type Params = {
+		id: string
 	}
 
 	export type {

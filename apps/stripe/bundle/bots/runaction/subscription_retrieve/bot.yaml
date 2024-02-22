@@ -1,0 +1,9 @@
+name: subscription_retrieve
+public: true
+type: RUNACTION
+dialect: TYPESCRIPT
+params:
+  - name: id
+    label: Subscription Id
+    type: TEXT
+    required: true

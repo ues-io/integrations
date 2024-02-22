@@ -1,0 +1,4 @@
+name: customer_search
+label: Search a Customer
+public: true
+bot: customer_search

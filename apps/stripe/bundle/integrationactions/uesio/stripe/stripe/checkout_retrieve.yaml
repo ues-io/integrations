@@ -1,0 +1,4 @@
+name: checkout_retrieve
+label: Get Checkout Session
+public: true
+bot: checkout_retrieve

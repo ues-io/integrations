@@ -1,0 +1,9 @@
+name: checkout_retrieve
+public: true
+type: RUNACTION
+dialect: TYPESCRIPT
+params:
+  - name: id
+    label: Checkout Session Id
+    type: TEXT
+    required: true
