@@ -1,9 +1,9 @@
-name: checkout_retrieve
+name: subscription_retrieve
 public: true
 type: RUNACTION
 dialect: TYPESCRIPT
 params:
   - name: id
-    label: Checkout Session Id
+    label: Subscription Id
     type: TEXT
     required: true
