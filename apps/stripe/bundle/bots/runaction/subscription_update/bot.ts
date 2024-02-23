@@ -1,20 +1,20 @@
 import { RunActionBotApi } from "@uesio/bots"
-import { Params } from "@uesio/app/bots/runaction/uesio/stripe/subscription_list"
+import { Params } from "@uesio/app/bots/runaction/uesio/stripe/subscription_update"
 import { Stripe } from "stripe"
 
-export default function subscription_retrieve(bot: RunActionBotApi) {
+export default function subscription_update(bot: RunActionBotApi) {
 	const params = bot.params.getAll() as Params
-	const { customer } = params
+	const { id, items } = params
 
 	const baseURL = bot.getIntegration().getBaseURL()
 	const result = bot.http.request<
-		Stripe.SubscriptionListParams,
+		Stripe.SubscriptionUpdateParams,
 		Stripe.Subscription
 	>({
-		method: "GET",
-		url: baseURL + `/v1/subscriptions`,
+		method: "POST",
+		url: baseURL + `/v1/subscriptions/${id}`,
 		body: {
-			customer: customer as string,
+			items,
 		},
 	})
 
@@ -23,5 +23,5 @@ export default function subscription_retrieve(bot: RunActionBotApi) {
 		return
 	}
 
-	bot.addResult("subscriptions", result.body)
+	bot.addResult("subscription", result.body)
 }
