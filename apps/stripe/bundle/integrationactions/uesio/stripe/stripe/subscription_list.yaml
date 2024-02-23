@@ -1,0 +1,4 @@
+name: subscription_list
+label: Get Subscription List
+public: true
+bot: subscription_list
