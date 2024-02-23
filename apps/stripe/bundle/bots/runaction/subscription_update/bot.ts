@@ -13,13 +13,16 @@ export default function subscription_update(bot: RunActionBotApi) {
 	>({
 		method: "POST",
 		url: baseURL + `/v1/subscriptions/${id}`,
+		headers: {
+			"Content-Type": "application/x-www-form-urlencoded",
+		},
 		body: {
 			items,
 		},
 	})
 
 	if (result.code !== 200) {
-		bot.addError("could not complete subscription list: " + result.code)
+		bot.addError("could not complete subscription update: " + result.code)
 		return
 	}
 
