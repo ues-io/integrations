@@ -1,0 +1,9 @@
+name: subscription_list
+public: true
+type: RUNACTION
+dialect: TYPESCRIPT
+params:
+  - name: customer
+    label: Customer Id
+    type: TEXT
+    required: true
