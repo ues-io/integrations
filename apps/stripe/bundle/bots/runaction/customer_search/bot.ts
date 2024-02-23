@@ -4,12 +4,6 @@ import { Stripe } from "stripe"
 
 export default function customer_search(bot: RunActionBotApi) {
 	const params = bot.params.getAll() as Params
-	const actionName = bot.getActionName()
-
-	if (actionName !== "customer_search") {
-		bot.addError("unsupported action name: " + actionName)
-		return
-	}
 
 	const buildQueryString = (params: Params) => {
 		let query = ""

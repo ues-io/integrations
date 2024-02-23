@@ -5,12 +5,6 @@ import { Stripe } from "stripe"
 export default function customer_create(bot: RunActionBotApi) {
 	const params = bot.params.getAll() as Params
 	const { name, email, metadata } = params
-	const actionName = bot.getActionName()
-
-	if (actionName !== "customer_create") {
-		bot.addError("unsupported action name: " + actionName)
-		return
-	}
 
 	const baseURL = bot.getIntegration().getBaseURL()
 	const result = bot.http.request<

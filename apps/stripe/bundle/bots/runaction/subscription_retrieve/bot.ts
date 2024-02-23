@@ -5,12 +5,6 @@ import { Stripe } from "stripe"
 export default function subscription_retrieve(bot: RunActionBotApi) {
 	const params = bot.params.getAll() as Params
 	const { id } = params
-	const actionName = bot.getActionName()
-
-	if (actionName !== "subscription_retrieve") {
-		bot.addError("unsupported action name: " + actionName)
-		return
-	}
 
 	const baseURL = bot.getIntegration().getBaseURL()
 	const result = bot.http.request<null, Stripe.Subscription>({

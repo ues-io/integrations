@@ -6,17 +6,11 @@ export default function checkout(bot: RunActionBotApi) {
 	const params = bot.params.getAll() as Params
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	const { currency, customer, success_url, cancel_url } = params
-	const actionName = bot.getActionName()
 	const mode = params.mode as Stripe.Checkout.SessionCreateParams.Mode
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	const line_items = params.line_items as
 		| Stripe.Checkout.SessionCreateParams.LineItem[]
 		| undefined
-
-	if (actionName !== "checkout") {
-		bot.addError("unsupported action name: " + actionName)
-		return
-	}
 
 	const baseURL = bot.getIntegration().getBaseURL()
 	const result = bot.http.request<

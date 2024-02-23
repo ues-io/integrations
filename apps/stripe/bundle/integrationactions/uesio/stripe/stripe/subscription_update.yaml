@@ -1,0 +1,4 @@
+name: subscription_update
+label: Update Subscription
+public: true
+bot: subscription_update
