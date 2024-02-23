@@ -1,4 +1,4 @@
-name: subscription_list
+name: subscription_update
 public: true
 type: RUNACTION
 dialect: TYPESCRIPT
