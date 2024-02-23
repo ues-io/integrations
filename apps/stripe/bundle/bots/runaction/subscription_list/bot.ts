@@ -13,6 +13,9 @@ export default function subscription_retrieve(bot: RunActionBotApi) {
 	>({
 		method: "GET",
 		url: baseURL + `/v1/subscriptions`,
+		headers: {
+			"Content-Type": "application/x-www-form-urlencoded",
+		},
 		body: {
 			customer: customer as string,
 		},
