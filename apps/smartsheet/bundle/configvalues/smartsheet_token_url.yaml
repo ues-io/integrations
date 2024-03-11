@@ -1,5 +1,5 @@
 name: smartsheet_token_url
+public: true
 store: platform
 managedBy: site
 defaultValue: https://api.smartsheet.com/2.0/token
-public: true

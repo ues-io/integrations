@@ -1,4 +1,4 @@
 name: smartsheet_save
+public: true
 type: SAVE
 dialect: TYPESCRIPT
-public: true
