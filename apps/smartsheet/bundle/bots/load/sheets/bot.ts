@@ -1,23 +1,12 @@
 import { FieldValue, LoadBotApi } from "@uesio/bots"
 
-type SheetColumn = {
+type Sheet = {
 	id: string
-}
-
-type SheetCell = {
-	columnId: string
-	displayValue: string
-	value: string
-}
-
-type SheetRow = {
-	id: string
-	cells: SheetCell[]
+	name: string
 }
 
 type SheetResponse = {
-	columns: SheetColumn[]
-	rows: SheetRow[] | undefined
+	data: Sheet[]
 }
 
 export default function smartsheet_load(bot: LoadBotApi) {
@@ -66,5 +55,11 @@ export default function smartsheet_load(bot: LoadBotApi) {
 		}
 	})
 
-	bot.log.info("blah", body)
+	body.data?.forEach((row) => {
+		const record: Record<string, FieldValue> = {
+			"uesio/core.id": row.id + "",
+			"uesio/smartsheet.name": row.name,
+		}
+		bot.addRecord(record)
+	})
 }
