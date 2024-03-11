@@ -1,0 +1,50 @@
+name: sheet_detail_content
+definition:
+  # Wires connect to data in collections
+  wires:
+    sheet:
+      collection: uesio/smartsheet.sheet
+      fields:
+        uesio/smartsheet.name:
+      conditions:
+        - field: uesio/core.id
+          valueSource: PARAM
+          param: recordid
+  # Components determine the layout and composition of your view
+  components:
+    - uesio/io.box:
+        uesio.display:
+          - type: paramIsSet
+            param: recordid
+        components:
+          - uesio/io.list:
+              wire: sheet
+              uesio.id: sheetList
+              components:
+                - uesio/io.titlebar:
+                    title: $RecordMeta{name}
+                    subtitle: $Collection{label}
+                    uesio.variant: uesio/io.main
+                    actions:
+                      - uesio/io.group:
+                          components:
+                - uesio/io.box:
+                    uesio.variant: uesio/io.section
+                    components:
+                      - uesio/io.field:
+                          fieldId: uesio/smartsheet.name
+    - uesio/io.box:
+        uesio.display:
+          - type: paramIsNotSet
+            param: recordid
+        uesio.styleTokens:
+          root:
+            - p-10
+        components:
+          - uesio/io.text:
+              text: Select a record
+  params:
+    recordid:
+      type: RECORD
+      required: true
+      collection: uesio/smartsheet.sheet

@@ -2,8 +2,7 @@
 node_modules/
 bundle/componentpacks/*/dist/
 # Don't include the following types within the app bundle
-bundle/collections/**
-bundle/fields/**
+
 bundle/routes/**
 bundle/selectlists/**
-bundle/views/**
+

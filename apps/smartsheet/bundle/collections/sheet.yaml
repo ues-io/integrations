@@ -1,0 +1,6 @@
+name: sheet
+label: Sheet
+type: EXTERNAL
+pluralLabel: Sheets
+integration: smartsheet
+loadBot: sheets
