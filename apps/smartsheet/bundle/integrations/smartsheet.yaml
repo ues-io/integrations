@@ -1,5 +1,5 @@
 name: smartsheet
+public: true
 type: smartsheet
 authentication: OAUTH2_AUTHORIZATION_CODE
 credentials: smartsheet
-public: true
