@@ -1,4 +1,4 @@
 name: sheets
+public: true
 type: LOAD
 dialect: TYPESCRIPT
-public: true
