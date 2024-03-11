@@ -5,17 +5,16 @@ type Sheet = {
 	name: string
 }
 
+type OneSheetResponse = {
+	data: Sheet
+}
+
 type SheetResponse = {
 	data: Sheet[]
 }
 
 export default function smartsheet_load(bot: LoadBotApi) {
-	const {
-		batchNumber = 0,
-		batchSize,
-		collectionMetadata,
-		conditions,
-	} = bot.loadRequest
+	const { batchNumber = 0, batchSize, conditions } = bot.loadRequest
 	const queryParams = {} as Record<string, FieldValue>
 	const doPagination = typeof batchSize === "number" && batchSize > 0
 	if (doPagination) {
@@ -39,22 +38,28 @@ export default function smartsheet_load(bot: LoadBotApi) {
 		}
 	}
 
-	const url = `https://api.smartsheet.com/2.0/sheets`
+	let url = "https://api.smartsheet.com/2.0/sheets"
+
+	if (rowIdCondition?.value) {
+		url = url + "/" + rowIdCondition.value
+	}
 
 	const response = bot.http.request({
 		method: "GET",
 		url,
 	})
-	const body = response.body as SheetResponse
-	const fieldsMetadata = collectionMetadata.getAllFieldMetadata()
-	const fields: typeof fieldsMetadata = {}
-	Object.keys(fieldsMetadata).forEach((key) => {
-		const fieldMetadata = fieldsMetadata[key]
-		if (fieldMetadata.externalName) {
-			fields[fieldMetadata.externalName] = fieldMetadata
-		}
-	})
 
+	if (rowIdCondition?.value) {
+		const body = response.body as OneSheetResponse
+		const sheet = body.data
+		const record: Record<string, FieldValue> = {
+			"uesio/core.id": sheet.id + "",
+			"uesio/smartsheet.name": sheet.name,
+		}
+		bot.addRecord(record)
+		return
+	}
+	const body = response.body as SheetResponse
 	body.data?.forEach((row) => {
 		const record: Record<string, FieldValue> = {
 			"uesio/core.id": row.id + "",
