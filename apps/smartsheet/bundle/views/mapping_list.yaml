@@ -1,0 +1,90 @@
+name: mapping_list
+definition:
+  # Wires connect to data in collections
+  wires:
+    mapping:
+      collection: uesio/smartsheet.mapping
+      fields:
+        uesio/smartsheet.collection:
+        uesio/smartsheet.fields:
+        uesio/smartsheet.sheet:
+  # Components determine the layout and composition of your view
+  components:
+    - uesio/io.viewlayout:
+        left:
+          - uesio/smartsheet.nav:
+        content:
+          - uesio/io.titlebar:
+              title: $Collection{mapping:pluralLabel}
+              subtitle: List View
+              uesio.variant: uesio/io.main
+              actions:
+                - uesio/io.group:
+                    components:
+                      - uesio/io.button:
+                          signals:
+                            - signal: wire/CREATE_RECORD
+                              wire: mapping
+                              prepend: true
+                            - signal: component/CALL
+                              component: uesio/io.table
+                              componentsignal: SET_EDIT_MODE
+                              targettype: specific
+                              componentid: mappingTable
+                          text: $Label{uesio/io.create}
+                          uesio.variant: uesio/io.primary
+                      - uesio/io.button:
+                          signals:
+                            - signal: wire/SAVE
+                              wires:
+                                - mapping
+                          text: $Label{uesio/io.save}
+                          hotkey: "meta+s"
+                          uesio.variant: uesio/io.secondary
+                          uesio.display:
+                            - type: wireHasChanges
+                              wire: mapping
+                      - uesio/io.button:
+                          signals:
+                            - signal: wire/CANCEL
+                              wire: mapping
+                          uesio.display:
+                            - type: wireHasChanges
+                              wire: mapping
+                          text: $Label{uesio/io.cancel}
+                          uesio.variant: uesio/io.secondary
+                      - uesio/io.button:
+                          signals:
+                            - signal: component/CALL
+                              component: uesio/io.table
+                              componentsignal: TOGGLE_MODE
+                              targettype: specific
+                              componentid: mappingTable
+                          text: Mode
+                          uesio.variant: uesio/io.secondary
+          - uesio/io.box:
+              uesio.variant: uesio/io.section
+              components:
+                - uesio/io.table:
+                    rowactions:
+                      - icon: visibility
+                        text: View
+                        uesio.display:
+                          - type: recordIsNotNew
+                        signals:
+                          - signal: route/NAVIGATE_TO_ASSIGNMENT
+                            viewtype: detail
+                            recordid: ${uesio/core.id}
+                            collection: uesio/smartsheet.mapping
+                      - icon: delete
+                        text: $Label{uesio/io.delete}
+                        signals:
+                          - signal: wire/TOGGLE_DELETE_STATUS
+                    columns:
+                      - field: uesio/smartsheet.collection
+                      - field: uesio/smartsheet.fields
+                      - field: uesio/smartsheet.sheet
+                    uesio.id: mappingTable
+                    mode: READ
+                    wire: mapping
+                    pagesize: 10

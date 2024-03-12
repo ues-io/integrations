@@ -1,0 +1,56 @@
+name: mapping_new
+definition:
+  # Wires connect to data in collections
+  wires:
+    mapping:
+      collection: uesio/smartsheet.mapping
+      fields:
+        uesio/smartsheet.collection:
+        uesio/smartsheet.fields:
+        uesio/smartsheet.sheet:
+      init:
+        create: true
+        query: false
+  # Components determine the layout and composition of your view
+  components:
+    - uesio/io.viewlayout:
+        left:
+          - uesio/smartsheet.nav:
+        content:
+          - uesio/io.list:
+              wire: mapping
+              uesio.id: mappingList
+              mode: EDIT
+              components:
+                - uesio/io.titlebar:
+                    title: Create a new $Collection{label}
+                    subtitle: $RecordMeta{name}
+                    uesio.variant: uesio/io.main
+                    actions:
+                      - uesio/io.group:
+                          components:
+                            - uesio/io.button:
+                                signals:
+                                  - signal: wire/SAVE
+                                    wires:
+                                      - mapping
+                                  - signal: route/NAVIGATE_TO_ASSIGNMENT
+                                    collection: uesio/smartsheet.mapping
+                                text: Create
+                                hotkey: "meta+s"
+                                uesio.variant: uesio/io.secondary
+                            - uesio/io.button:
+                                signals:
+                                  - signal: wire/CANCEL
+                                    wire: mapping
+                                text: Reset
+                                uesio.variant: uesio/io.secondary
+                - uesio/io.box:
+                    uesio.variant: uesio/io.section
+                    components:
+                      - uesio/io.field:
+                          fieldId: uesio/smartsheet.collection
+                      - uesio/io.field:
+                          fieldId: uesio/smartsheet.fields
+                      - uesio/io.field:
+                          fieldId: uesio/smartsheet.sheet
