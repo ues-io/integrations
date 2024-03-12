@@ -1,8 +1,16 @@
 import { FieldValue, LoadBotApi } from "@uesio/bots"
 
 type Sheet = {
-	id: string
+	id: number
 	name: string
+	columns?: Column[]
+}
+
+type Column = {
+	id: number
+	index: string
+	title: string
+	type: string
 }
 
 type SheetResponse = {
@@ -53,6 +61,7 @@ export default function smartsheet_load(bot: LoadBotApi) {
 		const record: Record<string, FieldValue> = {
 			"uesio/core.id": sheet.id + "",
 			"uesio/smartsheet.name": sheet.name,
+			"uesio/smartsheet.columns": sheet.columns as FieldValue,
 		}
 		bot.addRecord(record)
 

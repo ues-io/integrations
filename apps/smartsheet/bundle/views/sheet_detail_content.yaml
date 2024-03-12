@@ -6,6 +6,7 @@ definition:
       collection: uesio/smartsheet.sheet
       fields:
         uesio/smartsheet.name:
+        uesio/smartsheet.columns:
       conditions:
         - field: uesio/core.id
           valueSource: PARAM
