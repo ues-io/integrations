@@ -14,10 +14,22 @@ definition:
           param: recordid
     sheets:
       collection: uesio/smartsheet.sheet
-      init:
-        query: false
+      conditions:
+        - field: uesio/core.id
+          valueSource: LOOKUP
+          lookupWire: mapping
+          lookupField: uesio/smartsheet.sheet->uesio/core.id
       fields:
         uesio/core.id:
+        uesio/smartsheet.name:
+        uesio/smartsheet.columns:
+    fields:
+      collection: uesio/core.field
+      conditions:
+        - field: uesio/core.grouping
+          valueSource: LOOKUP
+          lookupWire: mapping
+          lookupField: uesio/smartsheet.collection
   # Components determine the layout and composition of your view
   components:
     - uesio/io.box:
@@ -72,6 +84,17 @@ definition:
                           displayAs: REFERENCE
                           reference:
                             collection: uesio/smartsheet.sheet
+                - uesio/io.box:
+                    uesio.variant: uesio/io.section
+                    components:
+                      - uesio/io.table:
+                          columns:
+                            - field: uesio/core.name
+                            - field: uesio/core.type
+                          uesio.id: fieldMappingTable
+                          mode: READ
+                          wire: fields
+                          pagesize: 10
     - uesio/io.box:
         uesio.display:
           - type: paramIsNotSet

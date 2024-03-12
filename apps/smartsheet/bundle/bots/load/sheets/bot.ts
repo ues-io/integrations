@@ -43,9 +43,16 @@ export default function smartsheet_load(bot: LoadBotApi) {
 	}
 
 	let url = "https://api.smartsheet.com/2.0/sheets"
+	let isSingleSheet = false
 
 	if (rowIdCondition?.value) {
+		isSingleSheet = true
 		url = url + "/" + rowIdCondition.value + "?rowNumbers=0"
+	}
+
+	if (rowIdCondition?.values) {
+		isSingleSheet = true
+		url = url + "/" + rowIdCondition.values[0] + "?rowNumbers=0"
 	}
 
 	const response = bot.http.request({
@@ -53,9 +60,8 @@ export default function smartsheet_load(bot: LoadBotApi) {
 		url,
 	})
 
-	if (rowIdCondition?.value) {
+	if (isSingleSheet) {
 		const sheet = response.body as Sheet
-		bot.log.info("blah", sheet)
 
 		if (!sheet) return
 		const record: Record<string, FieldValue> = {
