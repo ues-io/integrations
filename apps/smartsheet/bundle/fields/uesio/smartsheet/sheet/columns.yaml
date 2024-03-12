@@ -1,0 +1,4 @@
+name: columns
+label: columns
+type: LIST
+subtype: STRUCT

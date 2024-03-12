@@ -2,6 +2,6 @@ name: sheet
 label: Sheet
 type: EXTERNAL
 pluralLabel: Sheets
+nameField: name
 integration: smartsheet
 loadBot: sheets
-nameField: name
