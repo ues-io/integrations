@@ -34,6 +34,12 @@ definition:
                     components:
                       - uesio/io.field:
                           fieldId: uesio/smartsheet.name
+                - uesio/io.box:
+                    uesio.variant: uesio/io.section
+                    components:
+                      - uesio/io.field:
+                          labelPosition: none
+                          fieldId: uesio/smartsheet.columns
     - uesio/io.box:
         uesio.display:
           - type: paramIsNotSet
