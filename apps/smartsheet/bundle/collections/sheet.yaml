@@ -4,3 +4,4 @@ type: EXTERNAL
 pluralLabel: Sheets
 integration: smartsheet
 loadBot: sheets
+nameField: name

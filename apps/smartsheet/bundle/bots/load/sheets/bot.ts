@@ -5,10 +5,6 @@ type Sheet = {
 	name: string
 }
 
-type OneSheetResponse = {
-	data: Sheet
-}
-
 type SheetResponse = {
 	data: Sheet[]
 }
@@ -41,7 +37,7 @@ export default function smartsheet_load(bot: LoadBotApi) {
 	let url = "https://api.smartsheet.com/2.0/sheets"
 
 	if (rowIdCondition?.value) {
-		url = url + "/" + rowIdCondition.value
+		url = url + "/" + rowIdCondition.value + "?rowNumbers=0"
 	}
 
 	const response = bot.http.request({
@@ -50,13 +46,16 @@ export default function smartsheet_load(bot: LoadBotApi) {
 	})
 
 	if (rowIdCondition?.value) {
-		const body = response.body as OneSheetResponse
-		const sheet = body.data
+		const sheet = response.body as Sheet
+		bot.log.info("blah", sheet)
+
+		if (!sheet) return
 		const record: Record<string, FieldValue> = {
 			"uesio/core.id": sheet.id + "",
 			"uesio/smartsheet.name": sheet.name,
 		}
 		bot.addRecord(record)
+
 		return
 	}
 	const body = response.body as SheetResponse
