@@ -7,6 +7,12 @@ definition:
       fields:
         uesio/smartsheet.collection:
         uesio/smartsheet.sheet:
+    sheets:
+      collection: uesio/smartsheet.sheet
+      init:
+        query: false
+      fields:
+        uesio/core.id:
   # Components determine the layout and composition of your view
   components:
     - uesio/io.viewlayout:
@@ -37,6 +43,9 @@ definition:
                     columns:
                       - field: uesio/smartsheet.collection
                       - field: uesio/smartsheet.sheet
+                        displayAs: REFERENCE
+                        reference:
+                          collection: uesio/smartsheet.sheet
                     uesio.id: mappingTable
                     mode: READ
                     wire: mapping

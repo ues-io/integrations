@@ -1,3 +1,4 @@
 name: mapping
 label: Mapping
 pluralLabel: Mappings
+nameField: collection

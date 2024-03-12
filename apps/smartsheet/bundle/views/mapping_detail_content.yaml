@@ -63,9 +63,10 @@ definition:
                       - uesio/io.field:
                           fieldId: uesio/smartsheet.collection
                       - uesio/io.field:
-                          fieldId: uesio/smartsheet.fields
-                      - uesio/io.field:
                           fieldId: uesio/smartsheet.sheet
+                          displayAs: REFERENCE
+                          reference:
+                            collection: uesio/smartsheet.sheet
     - uesio/io.box:
         uesio.display:
           - type: paramIsNotSet
