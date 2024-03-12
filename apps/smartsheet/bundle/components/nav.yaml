@@ -2,7 +2,6 @@ name: nav
 category: LAYOUT
 type: DECLARATIVE
 slots:
-  - name: extra
 definition:
   - uesio/io.scrollpanel:
       uesio.variant: uesio/io.default
@@ -36,12 +35,71 @@ definition:
                               color: white
                   title: smartsheet
               - uesio/io.navsection:
-                  title: Collections
                   content:
-                    - uesio/io.sitenav:
+                    - uesio/io.box:
+                        uesio.styleTokens:
+                          root:
+                            - flex
+                            - gap-2
+                            - items-center
+                        components:
+                          - uesio/io.tile:
+                              uesio.variant: uesio/io.nav
+                              uesio.styleTokens:
+                                root:
+                                  - flex
+                                  - grow
+                              content:
+                                - uesio/io.text:
+                                    text: Sheets
+                              avatar:
+                                - uesio/io.text:
+                                    uesio.variant: uesio/io.icon
+                                    text: filter_alt
+                              signals:
+                                - signal: route/NAVIGATE_TO_ASSIGNMENT
+                                  collection: uesio/smartsheet.sheet
+                                  viewtype: list
+                    - uesio/io.box:
+                        uesio.styleTokens:
+                          root:
+                            - flex
+                            - gap-2
+                            - items-center
+                        components:
+                          - uesio/io.tile:
+                              uesio.variant: uesio/io.nav
+                              uesio.styleTokens:
+                                root:
+                                  - flex
+                                  - grow
+                              content:
+                                - uesio/io.text:
+                                    text: Mappings
+                              avatar:
+                                - uesio/io.text:
+                                    uesio.variant: uesio/io.icon
+                                    text: domain
+                              signals:
+                                - signal: route/NAVIGATE_TO_ASSIGNMENT
+                                  collection: uesio/smartsheet.mapping
+                                  viewtype: list
+                          - uesio/io.tile:
+                              uesio.variant: uesio/io.nav
+                              uesio.styleTokens:
+                                root:
+                                  - p-1.5
+                                avatar:
+                                  - text-sm
+                              avatar:
+                                - uesio/io.text:
+                                    uesio.variant: uesio/io.icon
+                                    text: add
+                              signals:
+                                - signal: route/NAVIGATE_TO_ASSIGNMENT
+                                  collection: uesio/smartsheet.mapping
+                                  viewtype: createnew
       content:
-        - uesio/core.slot:
-            name: extra
       footer:
         - uesio/io.box:
             uesio.styleTokens:

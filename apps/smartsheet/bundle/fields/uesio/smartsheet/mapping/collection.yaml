@@ -1,3 +1,6 @@
 name: collection
 label: Collection
-type: TEXT
+type: METADATA
+required: true
+metadata:
+  type: COLLECTION
