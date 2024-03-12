@@ -6,7 +6,6 @@ definition:
       collection: uesio/smartsheet.mapping
       fields:
         uesio/smartsheet.collection:
-        uesio/smartsheet.fields:
         uesio/smartsheet.sheet:
   # Components determine the layout and composition of your view
   components:
@@ -35,13 +34,8 @@ definition:
                             viewtype: detail
                             recordid: ${uesio/core.id}
                             collection: uesio/smartsheet.mapping
-                      - icon: delete
-                        text: $Label{uesio/io.delete}
-                        signals:
-                          - signal: wire/TOGGLE_DELETE_STATUS
                     columns:
                       - field: uesio/smartsheet.collection
-                      - field: uesio/smartsheet.fields
                       - field: uesio/smartsheet.sheet
                     uesio.id: mappingTable
                     mode: READ

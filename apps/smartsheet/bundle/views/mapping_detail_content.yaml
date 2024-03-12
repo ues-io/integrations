@@ -46,13 +46,17 @@ definition:
                                 uesio.variant: uesio/io.secondary
                             - uesio/io.button:
                                 signals:
-                                  - signal: component/CALL
-                                    component: uesio/io.list
-                                    componentsignal: TOGGLE_MODE
-                                    targettype: specific
-                                    componentid: mappingList
-                                text: Mode
+                                  - signal: wire/MARK_FOR_DELETE
+                                    wire: mapping
+                                  - signal: wire/SAVE
+                                    wires:
+                                      - mapping
+                                  - signal: route/NAVIGATE_TO_ASSIGNMENT
+                                    viewtype: list
+                                    collection: uesio/smartsheet.mapping
+                                text: Delete
                                 uesio.variant: uesio/io.secondary
+
                 - uesio/io.box:
                     uesio.variant: uesio/io.section
                     components:
