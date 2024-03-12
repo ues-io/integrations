@@ -1,0 +1,4 @@
+name: sheetdetail
+path: sheet/detail/{recordid}
+view: sheet_detail
+theme: uesio/core.default

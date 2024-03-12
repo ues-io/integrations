@@ -1,7 +1,6 @@
 name: nav
 category: LAYOUT
 type: DECLARATIVE
-slots:
 definition:
   - uesio/io.scrollpanel:
       uesio.variant: uesio/io.default

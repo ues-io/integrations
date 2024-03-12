@@ -1,0 +1,4 @@
+name: sheet
+path: sheet
+view: sheets
+theme: uesio/core.default
