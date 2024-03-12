@@ -55,7 +55,7 @@ definition:
                               avatar:
                                 - uesio/io.text:
                                     uesio.variant: uesio/io.icon
-                                    text: filter_alt
+                                    text: table_view
                               signals:
                                 - signal: route/NAVIGATE_TO_ASSIGNMENT
                                   collection: uesio/smartsheet.sheet
@@ -79,7 +79,7 @@ definition:
                               avatar:
                                 - uesio/io.text:
                                     uesio.variant: uesio/io.icon
-                                    text: domain
+                                    text: map
                               signals:
                                 - signal: route/NAVIGATE_TO_ASSIGNMENT
                                   collection: uesio/smartsheet.mapping
