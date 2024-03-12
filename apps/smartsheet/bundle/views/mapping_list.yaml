@@ -21,47 +21,6 @@ definition:
               actions:
                 - uesio/io.group:
                     components:
-                      - uesio/io.button:
-                          signals:
-                            - signal: wire/CREATE_RECORD
-                              wire: mapping
-                              prepend: true
-                            - signal: component/CALL
-                              component: uesio/io.table
-                              componentsignal: SET_EDIT_MODE
-                              targettype: specific
-                              componentid: mappingTable
-                          text: $Label{uesio/io.create}
-                          uesio.variant: uesio/io.primary
-                      - uesio/io.button:
-                          signals:
-                            - signal: wire/SAVE
-                              wires:
-                                - mapping
-                          text: $Label{uesio/io.save}
-                          hotkey: "meta+s"
-                          uesio.variant: uesio/io.secondary
-                          uesio.display:
-                            - type: wireHasChanges
-                              wire: mapping
-                      - uesio/io.button:
-                          signals:
-                            - signal: wire/CANCEL
-                              wire: mapping
-                          uesio.display:
-                            - type: wireHasChanges
-                              wire: mapping
-                          text: $Label{uesio/io.cancel}
-                          uesio.variant: uesio/io.secondary
-                      - uesio/io.button:
-                          signals:
-                            - signal: component/CALL
-                              component: uesio/io.table
-                              componentsignal: TOGGLE_MODE
-                              targettype: specific
-                              componentid: mappingTable
-                          text: Mode
-                          uesio.variant: uesio/io.secondary
           - uesio/io.box:
               uesio.variant: uesio/io.section
               components:

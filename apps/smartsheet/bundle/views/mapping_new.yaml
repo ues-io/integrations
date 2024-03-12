@@ -41,7 +41,7 @@ definition:
                                 uesio.variant: uesio/io.secondary
                             - uesio/io.button:
                                 signals:
-                                  - signal: wire/CANCEL
+                                  - signal: wire/RESET
                                     wire: mapping
                                 text: Reset
                                 uesio.variant: uesio/io.secondary
@@ -50,7 +50,5 @@ definition:
                     components:
                       - uesio/io.field:
                           fieldId: uesio/smartsheet.collection
-                      - uesio/io.field:
-                          fieldId: uesio/smartsheet.fields
                       - uesio/io.field:
                           fieldId: uesio/smartsheet.sheet
