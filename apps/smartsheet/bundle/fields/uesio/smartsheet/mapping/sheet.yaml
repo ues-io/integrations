@@ -1,3 +1,4 @@
 name: sheet
 label: Sheet
-type: TEXT
+type: MAP
+required: true

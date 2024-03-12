@@ -12,6 +12,12 @@ definition:
         - field: uesio/core.id
           valueSource: PARAM
           param: recordid
+    sheets:
+      collection: uesio/smartsheet.sheet
+      init:
+        query: false
+      fields:
+        uesio/core.id:
   # Components determine the layout and composition of your view
   components:
     - uesio/io.box:
