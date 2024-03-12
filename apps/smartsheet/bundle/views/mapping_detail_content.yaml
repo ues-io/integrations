@@ -56,7 +56,6 @@ definition:
                                     collection: uesio/smartsheet.mapping
                                 text: Delete
                                 uesio.variant: uesio/io.secondary
-
                 - uesio/io.box:
                     uesio.variant: uesio/io.section
                     components:
