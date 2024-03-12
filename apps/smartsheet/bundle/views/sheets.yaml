@@ -9,6 +9,8 @@ definition:
   # Components determine the layout and composition of your view
   components:
     - uesio/io.viewlayout:
+        left:
+          - uesio/smartsheet.nav:
         content:
           - uesio/io.titlebar:
               title: $Collection{sheet:pluralLabel}
