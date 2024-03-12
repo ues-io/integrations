@@ -1,0 +1,10 @@
+name: mapper
+category: DATA
+pack: main
+entrypoint: components/mapper/mapper
+title: Mapper
+discoverable: true
+description: A smartsheet column mapper
+properties:
+defaultDefinition:
+sections:

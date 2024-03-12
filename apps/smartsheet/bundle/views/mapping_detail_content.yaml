@@ -91,6 +91,9 @@ definition:
                           columns:
                             - field: uesio/core.name
                             - field: uesio/core.type
+                            - components:
+                                - uesio/smartsheet.mapper:
+                              label: Column
                           uesio.id: fieldMappingTable
                           mode: READ
                           wire: fields
