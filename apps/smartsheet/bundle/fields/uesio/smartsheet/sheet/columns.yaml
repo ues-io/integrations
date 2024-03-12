@@ -1,7 +1,6 @@
 name: columns
 label: columns
 type: LIST
-subtype: STRUCT
 subfields:
   - name: id
     label: Column ID
@@ -15,3 +14,4 @@ subfields:
   - name: type
     label: Column Type
     type: TEXT
+subtype: STRUCT
