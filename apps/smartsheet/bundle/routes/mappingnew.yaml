@@ -1,0 +1,5 @@
+name: mappingnew
+path: mappingnew
+view: mapping_new
+theme: uesio/core.default
+title: Mapping Create New View

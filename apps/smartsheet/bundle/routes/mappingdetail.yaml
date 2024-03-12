@@ -1,0 +1,5 @@
+name: mappingdetail
+path: mapping/detail/{recordid}
+view: mapping_detail
+theme: uesio/core.default
+title: Mapping Detail View

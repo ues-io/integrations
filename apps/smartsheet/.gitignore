@@ -3,6 +3,6 @@ node_modules/
 bundle/componentpacks/*/dist/
 # Don't include the following types within the app bundle
 
-bundle/routes/**
-bundle/selectlists/**
+
+
 
