@@ -1,0 +1,17 @@
+name: columns
+label: columns
+type: LIST
+subfields:
+  - name: id
+    label: Column ID
+    type: TEXT
+  - name: index
+    label: Column Index
+    type: TEXT
+  - name: title
+    label: Column Title
+    type: TEXT
+  - name: type
+    label: Column Type
+    type: TEXT
+subtype: STRUCT

@@ -1,4 +1,4 @@
 name: smartsheet
+public: true
 loadBot: smartsheet_load
 saveBot: smartsheet_save
-public: true

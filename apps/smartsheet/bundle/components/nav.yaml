@@ -1,0 +1,126 @@
+name: nav
+category: LAYOUT
+type: DECLARATIVE
+definition:
+  - uesio/io.scrollpanel:
+      uesio.variant: uesio/io.default
+      uesio.styleTokens:
+        inner:
+          - p-4
+      header:
+        - uesio/io.box:
+            uesio.styleTokens:
+              root:
+                - p-4
+                - grid
+                - gap-4
+            components:
+              - uesio/io.titlebar:
+                  uesio.variant: uesio/builder.profile
+                  avatar:
+                    - uesio/io.grid:
+                        uesio.styleTokens:
+                          root:
+                            - h-8
+                            - w-8
+                            - bg-[#2563eb]
+                            - rounded-full
+                            - items-center
+                            - justify-center
+                        items:
+                          - uesio/io.text:
+                              uesio.variant: uesio/io.icon
+                              text: key
+                              color: white
+                  title: smartsheet
+              - uesio/io.navsection:
+                  content:
+                    - uesio/io.box:
+                        uesio.styleTokens:
+                          root:
+                            - flex
+                            - gap-2
+                            - items-center
+                        components:
+                          - uesio/io.tile:
+                              uesio.variant: uesio/io.nav
+                              uesio.styleTokens:
+                                root:
+                                  - flex
+                                  - grow
+                              content:
+                                - uesio/io.text:
+                                    text: Sheets
+                              avatar:
+                                - uesio/io.text:
+                                    uesio.variant: uesio/io.icon
+                                    text: table_view
+                              signals:
+                                - signal: route/NAVIGATE_TO_ASSIGNMENT
+                                  collection: uesio/smartsheet.sheet
+                                  viewtype: list
+                    - uesio/io.box:
+                        uesio.styleTokens:
+                          root:
+                            - flex
+                            - gap-2
+                            - items-center
+                        components:
+                          - uesio/io.tile:
+                              uesio.variant: uesio/io.nav
+                              uesio.styleTokens:
+                                root:
+                                  - flex
+                                  - grow
+                              content:
+                                - uesio/io.text:
+                                    text: Mappings
+                              avatar:
+                                - uesio/io.text:
+                                    uesio.variant: uesio/io.icon
+                                    text: map
+                              signals:
+                                - signal: route/NAVIGATE_TO_ASSIGNMENT
+                                  collection: uesio/smartsheet.mapping
+                                  viewtype: list
+                          - uesio/io.tile:
+                              uesio.variant: uesio/io.nav
+                              uesio.styleTokens:
+                                root:
+                                  - p-1.5
+                                avatar:
+                                  - text-sm
+                              avatar:
+                                - uesio/io.text:
+                                    uesio.variant: uesio/io.icon
+                                    text: add
+                              signals:
+                                - signal: route/NAVIGATE_TO_ASSIGNMENT
+                                  collection: uesio/smartsheet.mapping
+                                  viewtype: createnew
+      content:
+      footer:
+        - uesio/io.box:
+            uesio.styleTokens:
+              root:
+                - p-4
+            components:
+              - uesio/io.titlebar:
+                  uesio.variant: uesio/builder.profile
+                  title: $User{username}
+                  subtitle: $User{profileLabel}
+                  avatar:
+                    - uesio/io.avatar:
+                        uesio.styleTokens:
+                          root:
+                            - h-8
+                            - w-8
+                        text: $User{initials}
+                        image: $User{picture}
+title: Navigation Component
+discoverable: true
+description: A component for app navigation
+sections:
+  - type: HOME
+    properties:
+  - type: DISPLAY

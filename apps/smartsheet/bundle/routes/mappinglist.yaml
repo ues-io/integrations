@@ -1,0 +1,5 @@
+name: mappinglist
+path: mapping
+view: mapping_list
+theme: uesio/core.default
+title: Mapping List View

@@ -1,0 +1,52 @@
+name: mapping_list
+definition:
+  # Wires connect to data in collections
+  wires:
+    mapping:
+      collection: uesio/smartsheet.mapping
+      fields:
+        uesio/smartsheet.collection:
+        uesio/smartsheet.sheet:
+    sheets:
+      collection: uesio/smartsheet.sheet
+      init:
+        query: false
+      fields:
+        uesio/core.id:
+  # Components determine the layout and composition of your view
+  components:
+    - uesio/io.viewlayout:
+        left:
+          - uesio/smartsheet.nav:
+        content:
+          - uesio/io.titlebar:
+              title: $Collection{mapping:pluralLabel}
+              subtitle: List View
+              uesio.variant: uesio/io.main
+              actions:
+                - uesio/io.group:
+                    components:
+          - uesio/io.box:
+              uesio.variant: uesio/io.section
+              components:
+                - uesio/io.table:
+                    rowactions:
+                      - icon: visibility
+                        text: View
+                        uesio.display:
+                          - type: recordIsNotNew
+                        signals:
+                          - signal: route/NAVIGATE_TO_ASSIGNMENT
+                            viewtype: detail
+                            recordid: ${uesio/core.id}
+                            collection: uesio/smartsheet.mapping
+                    columns:
+                      - field: uesio/smartsheet.collection
+                      - field: uesio/smartsheet.sheet
+                        displayAs: REFERENCE
+                        reference:
+                          collection: uesio/smartsheet.sheet
+                    uesio.id: mappingTable
+                    mode: READ
+                    wire: mapping
+                    pagesize: 10

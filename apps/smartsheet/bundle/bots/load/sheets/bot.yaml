@@ -1,4 +1,4 @@
-name: smartsheet_load
+name: sheets
 public: true
 type: LOAD
 dialect: TYPESCRIPT
