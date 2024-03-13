@@ -1,6 +1,11 @@
 import { FieldValue, LoadBotApi, LoadRequestMetadata } from "@uesio/bots"
 import smartsheet_load from "../bundle/bots/load/smartsheet_load/bot"
 
+const smartSheetBaseUrl = "https://api.smartsheet.com/2.0/sheets"
+const sheetId = "somesheetid"
+const nameColumnId = "nameColumnID"
+const statusColumnId = "statusColumnID"
+
 const sampleUesioCollectionName = "tasks"
 const sampleUesioNS = "luigi/foo"
 const mockBot = (
@@ -12,6 +17,7 @@ const mockBot = (
 		collectionMetadata: getSampleCollectionMetadata(),
 		...(loadRequest || {}),
 	},
+	load: jest.fn(),
 	addRecord: jest.fn(),
 	setHasMoreRecords: jest.fn(),
 	http: {
@@ -28,12 +34,12 @@ const row1 = {
 	id: 1,
 	cells: [
 		{
-			columnId: "taskname",
+			columnId: nameColumnId,
 			displayValue: "Test",
 			value: "Test",
 		},
 		{
-			columnId: "taskstatus",
+			columnId: statusColumnId,
 			displayValue: "In Progress",
 			value: "in_progress",
 		},
@@ -43,31 +49,27 @@ const row2 = {
 	id: 2,
 	cells: [
 		{
-			columnId: "taskname",
+			columnId: nameColumnId,
 			displayValue: "Another test",
 			value: "Another test",
 		},
 		{
-			columnId: "taskstatus",
+			columnId: statusColumnId,
 			displayValue: "Completed",
 			value: "completed",
 		},
 	],
 }
 
-const smartSheetBaseUrl = "https://api.smartsheet.com/2.0/sheets"
-const sheetId = "somesheetid"
-
 const getSampleCollectionMetadata = () => ({
-	externalName: sheetId,
+	name: sampleUesioCollectionName,
+	namespace: sampleUesioNS,
 	getAllFieldMetadata: jest.fn(() => ({
 		"uesio/smartsheet.name": {
-			externalName: "taskname",
 			name: "name",
 			namespace: "uesio/smartsheet",
 		},
 		"uesio/smartsheet.status": {
-			externalName: "taskstatus",
 			name: "status",
 			namespace: "uesio/smartsheet",
 		},
@@ -84,15 +86,42 @@ const uesioRow2 = {
 	"uesio/smartsheet.status": "completed",
 }
 
+const sampleMapping = [
+	{
+		"uesio/smartsheet.sheet": {
+			"uesio/core.id": sheetId,
+		},
+		"uesio/smartsheet.fields": {
+			["uesio/smartsheet.name"]: nameColumnId,
+			["uesio/smartsheet.status"]: statusColumnId,
+		},
+	},
+]
+
 describe("Smartsheet Load", () => {
+	it("should fail of no mapping was found", () => {
+		const bot = mockBot([row1, row2])
+		bot.load.mockReturnValue([])
+		expect(() => {
+			smartsheet_load(bot as unknown as LoadBotApi)
+		}).toThrow(
+			"Smartsheet load failed: No mapping provided for collection: luigi/foo.tasks"
+		)
+	})
 	it("should load data from Smartsheet", () => {
 		const bot = mockBot([row1, row2])
+		bot.load.mockReturnValue(sampleMapping)
 		smartsheet_load(bot as unknown as LoadBotApi)
+		expect(bot.http.request).toHaveBeenCalledWith({
+			method: "GET",
+			url: `${smartSheetBaseUrl}/${sheetId}?includeAll=true`,
+		})
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow1)
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow2)
 	})
 	it("should not bomb if no rows or cells are returned", () => {
 		let bot = mockBot(undefined)
+		bot.load.mockReturnValue(sampleMapping)
 		smartsheet_load(bot as unknown as LoadBotApi)
 		expect(bot.addRecord).toHaveBeenCalledTimes(0)
 		bot = mockBot([
@@ -100,6 +129,7 @@ describe("Smartsheet Load", () => {
 				id: "123",
 			},
 		])
+		bot.load.mockReturnValue(sampleMapping)
 		smartsheet_load(bot as unknown as LoadBotApi)
 		expect(bot.addRecord).toHaveBeenCalledWith({
 			"uesio/core.id": "123",
@@ -117,6 +147,7 @@ describe("Smartsheet Load", () => {
 				},
 			],
 		})
+		bot.load.mockReturnValue(sampleMapping)
 		smartsheet_load(bot as unknown as LoadBotApi)
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow1)
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow2)
@@ -139,6 +170,7 @@ describe("Smartsheet Load", () => {
 				},
 			],
 		})
+		bot.load.mockReturnValue(sampleMapping)
 		smartsheet_load(bot as unknown as LoadBotApi)
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow2)
 		// We asked for up to 1 records, but only got back 1, so there are no more records available
@@ -153,6 +185,7 @@ describe("Smartsheet Load", () => {
 			batchSize: 1,
 			batchNumber: 0,
 		})
+		bot.load.mockReturnValue(sampleMapping)
 		smartsheet_load(bot as unknown as LoadBotApi)
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow1)
 		// We asked for up to 1 records, and got back 2, so there ARE records available
