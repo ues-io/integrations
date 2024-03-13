@@ -25,6 +25,10 @@ const Component: definition.UC<ComponentDefinition> = (props) => {
 	)
 	const fieldName = record.getFieldValue<string>("uesio/core.name")
 	if (!fieldName) throw new Error("No field name available")
+	const fieldNamespace = record.getFieldValue<string>("uesio/core.namespace")
+	if (!fieldNamespace) throw new Error("No field namespace available")
+
+	const fieldKey = fieldNamespace + "." + fieldName
 
 	const sheetWire = api.wire.useWire("sheets", context)
 	if (!sheetWire) throw new Error("No wire named sheets")
@@ -35,7 +39,7 @@ const Component: definition.UC<ComponentDefinition> = (props) => {
 	) as Column[]
 	if (!columns) throw new Error("No columns provided by sheets wire")
 
-	const selected = fieldMappings?.[fieldName]
+	const selected = fieldMappings?.[fieldKey]
 
 	const options = columns.map((column) => ({
 		label: column.title,
@@ -56,7 +60,7 @@ const Component: definition.UC<ComponentDefinition> = (props) => {
 						{
 							...fieldMappings,
 							...{
-								[fieldName]: value,
+								[fieldKey]: value,
 							},
 						},
 						context

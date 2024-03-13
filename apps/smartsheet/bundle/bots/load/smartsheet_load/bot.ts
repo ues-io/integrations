@@ -20,6 +20,13 @@ type SheetResponse = {
 	rows: SheetRow[] | undefined
 }
 
+type Mapping = {
+	"uesio/smartsheet.sheet": {
+		"uesio/core.id": string
+	}
+	"uesio/smartsheet.fields": Record<string, string>
+}
+
 export default function smartsheet_load(bot: LoadBotApi) {
 	const {
 		batchNumber = 0,
@@ -37,6 +44,9 @@ export default function smartsheet_load(bot: LoadBotApi) {
 	} else {
 		queryParams.includeAll = true
 	}
+
+	const collectionFullName =
+		collectionMetadata.namespace + "." + collectionMetadata.name
 
 	// Transform Conditions on the Uesio Core Id into row Id filters
 	const rowIdCondition = conditions?.find(
@@ -57,7 +67,39 @@ export default function smartsheet_load(bot: LoadBotApi) {
 		)
 		.join("&")
 
-	const url = `https://api.smartsheet.com/2.0/sheets/${collectionMetadata.externalName}?${queryString}`
+	// Get the sheet id from the mapping record
+	const mappingResponse = bot.load({
+		collection: "uesio/smartsheet.mapping",
+		fields: [
+			{
+				id: "uesio/smartsheet.fields",
+			},
+			{
+				id: "uesio/smartsheet.sheet",
+			},
+		],
+		conditions: [
+			{
+				field: "collection",
+				operator: "EQ",
+				value: collectionFullName,
+			},
+		],
+	}) as Mapping[]
+
+	if (!mappingResponse || mappingResponse.length === 0) {
+		throw new Error(
+			"Smartsheet load failed: No mapping provided for collection: " +
+				collectionFullName
+		)
+	}
+
+	const sheetId =
+		mappingResponse[0]["uesio/smartsheet.sheet"]["uesio/core.id"]
+
+	const fieldMappings = mappingResponse[0]["uesio/smartsheet.fields"]
+
+	const url = `https://api.smartsheet.com/2.0/sheets/${sheetId}?${queryString}`
 
 	const response = bot.http.request({
 		method: "GET",
@@ -68,8 +110,9 @@ export default function smartsheet_load(bot: LoadBotApi) {
 	const fields: typeof fieldsMetadata = {}
 	Object.keys(fieldsMetadata).forEach((key) => {
 		const fieldMetadata = fieldsMetadata[key]
-		if (fieldMetadata.externalName) {
-			fields[fieldMetadata.externalName] = fieldMetadata
+		const columnId = fieldMappings[key]
+		if (columnId) {
+			fields[columnId] = fieldMetadata
 		}
 	})
 
