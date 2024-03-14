@@ -1,4 +1,4 @@
-import { SaveBotApi } from "@uesio/bots"
+import { FieldValue, SaveBotApi } from "@uesio/bots"
 
 type Mapping = {
 	"uesio/smartsheet.sheet": {
@@ -49,7 +49,7 @@ export default function smartsheet_save(bot: SaveBotApi) {
 	const fieldsMetadata = collectionMetadata.getAllFieldMetadata()
 
 	// Get the sheet id from the mapping record
-	const mappingResponse = bot.load({
+	const mappingResult = bot.load({
 		collection: "uesio/smartsheet.mapping",
 		fields: [
 			{
@@ -66,40 +66,66 @@ export default function smartsheet_save(bot: SaveBotApi) {
 				value: collectionFullName,
 			},
 		],
-	}) as Mapping[]
+	})?.[0] as Mapping
 
-	const insertRequest = bot.inserts.get().map((insertApi) => {
-		const insertData = insertApi.getAll()
-		return {
-			toTop: true,
-			cells: Object.keys(insertData).flatMap((fieldkey) => {
-				const fieldMetadata = fieldsMetadata[fieldkey]
-				if (!fieldMetadata || !fieldMetadata.externalName) return []
-				return [
-					{
-						columnId: fieldMetadata.externalName,
-						value: insertData[fieldkey],
-					},
-				]
-			}),
-		}
-	})
+	if (!mappingResult) {
+		throw new Error(
+			"Smartsheet load failed: No mapping provided for collection: " +
+				collectionFullName
+		)
+	}
+
+	const sheetId = mappingResult["uesio/smartsheet.sheet"]["uesio/core.id"]
+
+	const fieldMappings = mappingResult["uesio/smartsheet.fields"]
+
+	const getCellChanges = (changeData: Record<string, FieldValue>) =>
+		Object.keys(changeData).flatMap((fieldkey) => {
+			const fieldMetadata = fieldsMetadata[fieldkey]
+			const mappingValue = fieldMappings[fieldkey]
+			if (!fieldMetadata || !mappingValue) return []
+			if (fieldMetadata.type === "MAP") {
+				const mappings = mappingValue as Record<string, string>
+				return Object.entries(mappings).flatMap(([path, columnId]) => {
+					const mapValue = changeData[fieldkey] as Record<
+						string,
+						unknown
+					>
+					if (!mapValue) {
+						return []
+					}
+					const valueToSet = mapValue[path]
+					if (!valueToSet) {
+						return []
+					}
+					return [
+						{
+							columnId,
+							value: valueToSet,
+						},
+					]
+				})
+			}
+			const columnId = mappingValue as string
+			return [
+				{
+					columnId,
+					value: changeData[fieldkey],
+				},
+			]
+		})
+
+	const insertRequest = bot.inserts.get().map((insertApi) => ({
+		toTop: true,
+		cells: getCellChanges(insertApi.getAll()),
+	}))
 
 	const updateRequest = bot.updates.get().map((updateApi) => {
 		const updateData = updateApi.getAll()
 		return {
 			id: updateData["uesio/core.id"],
 			toTop: true,
-			cells: Object.keys(updateData).flatMap((fieldkey) => {
-				const fieldMetadata = fieldsMetadata[fieldkey]
-				if (!fieldMetadata || !fieldMetadata.externalName) return []
-				return [
-					{
-						columnId: fieldMetadata.externalName,
-						value: updateData[fieldkey],
-					},
-				]
-			}),
+			cells: getCellChanges(updateData),
 		}
 	})
 
@@ -107,10 +133,7 @@ export default function smartsheet_save(bot: SaveBotApi) {
 		.get()
 		.map((deleteApi) => deleteApi.getId())
 
-	const url =
-		"https://api.smartsheet.com/2.0/sheets/" +
-		collectionMetadata.externalName +
-		"/rows"
+	const url = "https://api.smartsheet.com/2.0/sheets/" + sheetId + "/rows"
 
 	if (insertRequest.length) {
 		bot.log.info("Insert Request", insertRequest)

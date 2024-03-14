@@ -68,7 +68,7 @@ export default function smartsheet_load(bot: LoadBotApi) {
 		.join("&")
 
 	// Get the sheet id from the mapping record
-	const mappingResponse = bot.load({
+	const mappingResult = bot.load({
 		collection: "uesio/smartsheet.mapping",
 		fields: [
 			{
@@ -85,19 +85,18 @@ export default function smartsheet_load(bot: LoadBotApi) {
 				value: collectionFullName,
 			},
 		],
-	}) as Mapping[]
+	})?.[0] as Mapping
 
-	if (!mappingResponse || mappingResponse.length === 0) {
+	if (!mappingResult) {
 		throw new Error(
 			"Smartsheet load failed: No mapping provided for collection: " +
 				collectionFullName
 		)
 	}
 
-	const sheetId =
-		mappingResponse[0]["uesio/smartsheet.sheet"]["uesio/core.id"]
+	const sheetId = mappingResult["uesio/smartsheet.sheet"]["uesio/core.id"]
 
-	const fieldMappings = mappingResponse[0]["uesio/smartsheet.fields"]
+	const fieldMappings = mappingResult["uesio/smartsheet.fields"]
 
 	const url = `https://api.smartsheet.com/2.0/sheets/${sheetId}?${queryString}`
 
@@ -116,10 +115,10 @@ export default function smartsheet_load(bot: LoadBotApi) {
 			}
 			if (fieldMetadata.type === "MAP") {
 				const mappings = mappingValue as Record<string, string>
-				return Object.entries(mappings).map(([k, v]) => [
-					v,
+				return Object.entries(mappings).map(([path, columnId]) => [
+					columnId,
 					{
-						path: k,
+						path,
 						metadata: fieldMetadata,
 					},
 				])
