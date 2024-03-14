@@ -73,6 +73,11 @@ const getSampleCollectionMetadata = () => ({
 			name: "status",
 			namespace: "uesio/smartsheet",
 		},
+		"uesio/smartsheet.extra": {
+			name: "extra",
+			namespace: "uesio/smartsheet",
+			type: "MAP",
+		},
 	})),
 })
 const uesioRow1 = {
@@ -118,6 +123,74 @@ describe("Smartsheet Load", () => {
 		})
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow1)
 		expect(bot.addRecord).toHaveBeenCalledWith(uesioRow2)
+	})
+	it("should load data from Smartsheet with a map mapping", () => {
+		const bot = mockBot([row1, row2])
+		bot.load.mockReturnValue([
+			{
+				"uesio/smartsheet.sheet": {
+					"uesio/core.id": sheetId,
+				},
+				"uesio/smartsheet.fields": {
+					["uesio/smartsheet.extra"]: {
+						name: nameColumnId,
+						status: statusColumnId,
+					},
+				},
+			},
+		])
+		smartsheet_load(bot as unknown as LoadBotApi)
+		expect(bot.http.request).toHaveBeenCalledWith({
+			method: "GET",
+			url: `${smartSheetBaseUrl}/${sheetId}?includeAll=true`,
+		})
+		expect(bot.addRecord).toHaveBeenCalledWith({
+			"uesio/core.id": "1",
+			"uesio/smartsheet.extra": {
+				name: "Test",
+				status: "in_progress",
+			},
+		})
+		expect(bot.addRecord).toHaveBeenCalledWith({
+			"uesio/core.id": "2",
+			"uesio/smartsheet.extra": {
+				name: "Another test",
+				status: "completed",
+			},
+		})
+	})
+	it("should load data from Smartsheet with a multi-level map mapping", () => {
+		const bot = mockBot([row1, row2])
+		bot.load.mockReturnValue([
+			{
+				"uesio/smartsheet.sheet": {
+					"uesio/core.id": sheetId,
+				},
+				"uesio/smartsheet.fields": {
+					["uesio/smartsheet.extra"]: {
+						"info->name": nameColumnId,
+						"info->status": statusColumnId,
+					},
+				},
+			},
+		])
+		smartsheet_load(bot as unknown as LoadBotApi)
+		expect(bot.http.request).toHaveBeenCalledWith({
+			method: "GET",
+			url: `${smartSheetBaseUrl}/${sheetId}?includeAll=true`,
+		})
+		expect(bot.addRecord).toHaveBeenCalledWith({
+			"uesio/core.id": "1",
+			"uesio/smartsheet.extra": {
+				info: { name: "Test", status: "in_progress" },
+			},
+		})
+		expect(bot.addRecord).toHaveBeenCalledWith({
+			"uesio/core.id": "2",
+			"uesio/smartsheet.extra": {
+				info: { name: "Another test", status: "completed" },
+			},
+		})
 	})
 	it("should not bomb if no rows or cells are returned", () => {
 		let bot = mockBot(undefined)

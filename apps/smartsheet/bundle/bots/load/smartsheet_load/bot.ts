@@ -24,7 +24,7 @@ type Mapping = {
 	"uesio/smartsheet.sheet": {
 		"uesio/core.id": string
 	}
-	"uesio/smartsheet.fields": Record<string, string>
+	"uesio/smartsheet.fields": Record<string, unknown>
 }
 
 export default function smartsheet_load(bot: LoadBotApi) {
@@ -68,7 +68,7 @@ export default function smartsheet_load(bot: LoadBotApi) {
 		.join("&")
 
 	// Get the sheet id from the mapping record
-	const mappingResponse = bot.load({
+	const mappingResult = bot.load({
 		collection: "uesio/smartsheet.mapping",
 		fields: [
 			{
@@ -85,19 +85,18 @@ export default function smartsheet_load(bot: LoadBotApi) {
 				value: collectionFullName,
 			},
 		],
-	}) as Mapping[]
+	})?.[0] as Mapping
 
-	if (!mappingResponse || mappingResponse.length === 0) {
+	if (!mappingResult) {
 		throw new Error(
 			"Smartsheet load failed: No mapping provided for collection: " +
 				collectionFullName
 		)
 	}
 
-	const sheetId =
-		mappingResponse[0]["uesio/smartsheet.sheet"]["uesio/core.id"]
+	const sheetId = mappingResult["uesio/smartsheet.sheet"]["uesio/core.id"]
 
-	const fieldMappings = mappingResponse[0]["uesio/smartsheet.fields"]
+	const fieldMappings = mappingResult["uesio/smartsheet.fields"]
 
 	const url = `https://api.smartsheet.com/2.0/sheets/${sheetId}?${queryString}`
 
@@ -107,14 +106,46 @@ export default function smartsheet_load(bot: LoadBotApi) {
 	})
 	const body = response.body as SheetResponse
 	const fieldsMetadata = collectionMetadata.getAllFieldMetadata()
-	const fields: typeof fieldsMetadata = {}
-	Object.keys(fieldsMetadata).forEach((key) => {
-		const fieldMetadata = fieldsMetadata[key]
-		const columnId = fieldMappings[key]
-		if (columnId) {
-			fields[columnId] = fieldMetadata
-		}
-	})
+
+	const fieldsByColumn = Object.fromEntries(
+		Object.entries(fieldsMetadata).flatMap(([key, fieldMetadata]) => {
+			const mappingValue = fieldMappings[key]
+			if (!mappingValue) {
+				return []
+			}
+			if (fieldMetadata.type === "MAP") {
+				const mappings = mappingValue as Record<string, string>
+				return Object.entries(mappings).map(([path, columnId]) => [
+					columnId,
+					{
+						path,
+						metadata: fieldMetadata,
+					},
+				])
+			}
+			return [
+				[
+					mappingValue,
+					{
+						path: "",
+						metadata: fieldMetadata,
+					},
+				],
+			]
+		})
+	)
+
+	const set = (
+		obj: Record<string, unknown>,
+		path: string[],
+		value: unknown
+	) => {
+		path.reduce((acc, key, i) => {
+			if (acc[key] === undefined) acc[key] = {}
+			if (i === path.length - 1) acc[key] = value
+			return acc[key]
+		}, obj)
+	}
 
 	const maxRecordForPagination = doPagination
 		? (queryParams.pageSize as number) - 1
@@ -132,9 +163,21 @@ export default function smartsheet_load(bot: LoadBotApi) {
 		}
 
 		row.cells?.forEach((cell) => {
-			const field = fields[cell.columnId]
-			if (field) {
-				record[field.namespace + "." + field.name] = cell.value
+			const fieldInfo = fieldsByColumn[cell.columnId]
+			const metadata = fieldInfo?.metadata
+			if (metadata) {
+				const fieldKey = metadata.namespace + "." + metadata.name
+				if (metadata.type === "MAP") {
+					let existing = record[fieldKey] as Record<string, unknown>
+					if (!existing) {
+						record[fieldKey] = {}
+						existing = record[fieldKey] as Record<string, unknown>
+					}
+					set(existing, fieldInfo.path.split("->"), cell.value)
+					record[fieldKey] = existing
+				} else {
+					record[fieldKey] = cell.value
+				}
 			}
 		})
 		bot.addRecord(record)

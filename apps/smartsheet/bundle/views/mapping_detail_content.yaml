@@ -98,6 +98,12 @@ definition:
                           mode: READ
                           wire: fields
                           pagesize: 10
+                - uesio/io.box:
+                    uesio.variant: uesio/io.section
+                    components:
+                      - uesio/io.field:
+                          fieldId: uesio/smartsheet.fields
+                          displayAs: CODE
     - uesio/io.box:
         uesio.display:
           - type: paramIsNotSet
