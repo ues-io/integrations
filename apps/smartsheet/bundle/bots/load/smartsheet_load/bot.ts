@@ -135,7 +135,17 @@ export default function smartsheet_load(bot: LoadBotApi) {
 		})
 	)
 
-	bot.log.info("fvc", fieldsByColumn)
+	const set = (
+		obj: Record<string, unknown>,
+		path: string[],
+		value: unknown
+	) => {
+		path.reduce((acc, key, i) => {
+			if (acc[key] === undefined) acc[key] = {}
+			if (i === path.length - 1) acc[key] = value
+			return acc[key]
+		}, obj)
+	}
 
 	const maxRecordForPagination = doPagination
 		? (queryParams.pageSize as number) - 1
@@ -163,11 +173,8 @@ export default function smartsheet_load(bot: LoadBotApi) {
 						record[fieldKey] = {}
 						existing = record[fieldKey] as Record<string, unknown>
 					}
-					const mapValue = {
-						...existing,
-						[fieldInfo.path]: cell.value,
-					}
-					record[fieldKey] = mapValue
+					set(existing, fieldInfo.path.split("->"), cell.value)
+					record[fieldKey] = existing
 				} else {
 					record[fieldKey] = cell.value
 				}

@@ -79,6 +79,12 @@ export default function smartsheet_save(bot: SaveBotApi) {
 
 	const fieldMappings = mappingResult["uesio/smartsheet.fields"]
 
+	const get = (obj: Record<string, unknown>, path: string[]) => {
+		// If path is not defined or it has false value
+		if (!path) return undefined
+		return path.reduce((prevObj, key) => prevObj && prevObj[key], obj)
+	}
+
 	const getCellChanges = (changeData: Record<string, FieldValue>) =>
 		Object.keys(changeData).flatMap((fieldkey) => {
 			const fieldMetadata = fieldsMetadata[fieldkey]
@@ -94,8 +100,8 @@ export default function smartsheet_save(bot: SaveBotApi) {
 					if (!mapValue) {
 						return []
 					}
-					const valueToSet = mapValue[path]
-					if (!valueToSet) {
+					const valueToSet = get(mapValue, path.split("->"))
+					if (valueToSet === undefined) {
 						return []
 					}
 					return [
