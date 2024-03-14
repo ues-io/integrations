@@ -1,7 +1,17 @@
 import { SaveBotApi } from "@uesio/bots"
 
+type Mapping = {
+	"uesio/smartsheet.sheet": {
+		"uesio/core.id": string
+	}
+	"uesio/smartsheet.fields": Record<string, unknown>
+}
+
 export default function smartsheet_save(bot: SaveBotApi) {
 	const { collectionMetadata } = bot.saveRequest
+
+	const collectionFullName =
+		collectionMetadata.namespace + "." + collectionMetadata.name
 
 	bot.deletes.get().forEach((deleteApi) => {
 		bot.log.info("got a record to delete, with id: " + deleteApi.getId())
@@ -37,6 +47,26 @@ export default function smartsheet_save(bot: SaveBotApi) {
 	}
 
 	const fieldsMetadata = collectionMetadata.getAllFieldMetadata()
+
+	// Get the sheet id from the mapping record
+	const mappingResponse = bot.load({
+		collection: "uesio/smartsheet.mapping",
+		fields: [
+			{
+				id: "uesio/smartsheet.fields",
+			},
+			{
+				id: "uesio/smartsheet.sheet",
+			},
+		],
+		conditions: [
+			{
+				field: "collection",
+				operator: "EQ",
+				value: collectionFullName,
+			},
+		],
+	}) as Mapping[]
 
 	const insertRequest = bot.inserts.get().map((insertApi) => {
 		const insertData = insertApi.getAll()

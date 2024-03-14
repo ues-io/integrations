@@ -24,7 +24,7 @@ type Mapping = {
 	"uesio/smartsheet.sheet": {
 		"uesio/core.id": string
 	}
-	"uesio/smartsheet.fields": Record<string, string>
+	"uesio/smartsheet.fields": Record<string, unknown>
 }
 
 export default function smartsheet_load(bot: LoadBotApi) {
@@ -107,14 +107,36 @@ export default function smartsheet_load(bot: LoadBotApi) {
 	})
 	const body = response.body as SheetResponse
 	const fieldsMetadata = collectionMetadata.getAllFieldMetadata()
-	const fields: typeof fieldsMetadata = {}
-	Object.keys(fieldsMetadata).forEach((key) => {
-		const fieldMetadata = fieldsMetadata[key]
-		const columnId = fieldMappings[key]
-		if (columnId) {
-			fields[columnId] = fieldMetadata
-		}
-	})
+
+	const fieldsByColumn = Object.fromEntries(
+		Object.entries(fieldsMetadata).flatMap(([key, fieldMetadata]) => {
+			const mappingValue = fieldMappings[key]
+			if (!mappingValue) {
+				return []
+			}
+			if (fieldMetadata.type === "MAP") {
+				const mappings = mappingValue as Record<string, string>
+				return Object.entries(mappings).map(([k, v]) => [
+					v,
+					{
+						path: k,
+						metadata: fieldMetadata,
+					},
+				])
+			}
+			return [
+				[
+					mappingValue,
+					{
+						path: "",
+						metadata: fieldMetadata,
+					},
+				],
+			]
+		})
+	)
+
+	bot.log.info("fvc", fieldsByColumn)
 
 	const maxRecordForPagination = doPagination
 		? (queryParams.pageSize as number) - 1
@@ -132,9 +154,24 @@ export default function smartsheet_load(bot: LoadBotApi) {
 		}
 
 		row.cells?.forEach((cell) => {
-			const field = fields[cell.columnId]
-			if (field) {
-				record[field.namespace + "." + field.name] = cell.value
+			const fieldInfo = fieldsByColumn[cell.columnId]
+			const metadata = fieldInfo?.metadata
+			if (metadata) {
+				const fieldKey = metadata.namespace + "." + metadata.name
+				if (metadata.type === "MAP") {
+					let existing = record[fieldKey] as Record<string, unknown>
+					if (!existing) {
+						record[fieldKey] = {}
+						existing = record[fieldKey] as Record<string, unknown>
+					}
+					const mapValue = {
+						...existing,
+						[fieldInfo.path]: cell.value,
+					}
+					record[fieldKey] = mapValue
+				} else {
+					record[fieldKey] = cell.value
+				}
 			}
 		})
 		bot.addRecord(record)
