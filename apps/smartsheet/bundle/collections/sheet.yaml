@@ -5,3 +5,4 @@ pluralLabel: Sheets
 nameField: name
 integration: smartsheet
 loadBot: sheets
+public: true
