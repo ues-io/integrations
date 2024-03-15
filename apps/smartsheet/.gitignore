@@ -1,6 +1,7 @@
 .uesio
 node_modules/
-bundle/componentpacks/*/dist/
+bundle/componentpacks/*/dist/meta.json
+bundle/componentpacks/*/dist/runtime.ts
 # Don't include the following types within the app bundle
 
 
