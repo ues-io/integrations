@@ -50,4 +50,5 @@ Thumbs.db
 /uesio
 
 # Uesio Component Pack dist files
-**/bundle/componentpacks/*/dist/
+**/bundle/componentpacks/*/dist/meta.json
+**/bundle/componentpacks/*/dist/runtime.ts
