@@ -3,3 +3,5 @@ label: Mapping
 pluralLabel: Mappings
 nameField: collection
 public: true
+uniqueKey:
+  - uesio/smartsheet.collection

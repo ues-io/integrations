@@ -1,7 +1,8 @@
 import { definition, api, component } from "@uesio/ui"
 
 type ComponentDefinition = {
-	text: string
+	mappingWireName: string
+	sheetWireName: string
 }
 
 type Column = {
@@ -15,10 +16,12 @@ const Component: definition.UC<ComponentDefinition> = (props) => {
 	const SelectField = component.getUtility("uesio/io.selectfield")
 	const FieldWrapper = component.getUtility("uesio/io.fieldwrapper")
 	const MapField = component.getUtility("uesio/io.mapfield")
-	const { context } = props
+	const { context, definition } = props
+	const { mappingWireName, sheetWireName } = definition
 	const record = context.getRecord()
-	const mappingWire = api.wire.useWire("mapping", context)
-	if (!mappingWire) throw new Error("No wire named mapping")
+	const mappingWire = api.wire.useWire(mappingWireName, context)
+	if (!mappingWire)
+		throw new Error("No mapping wire found: " + mappingWireName)
 	const mappingRecord = mappingWire.getFirstRecord()
 	if (!mappingRecord) throw new Error("No record in mapping wire")
 	const fieldMappings = mappingRecord.getFieldValue<Record<string, string>>(
@@ -33,8 +36,8 @@ const Component: definition.UC<ComponentDefinition> = (props) => {
 
 	const fieldKey = fieldNamespace + "." + fieldName
 
-	const sheetWire = api.wire.useWire("sheets", context)
-	if (!sheetWire) throw new Error("No wire named sheets")
+	const sheetWire = api.wire.useWire(sheetWireName, context)
+	if (!sheetWire) throw new Error("No sheet wire found: " + sheetWireName)
 	const sheetRecord = sheetWire.getFirstRecord()
 	if (!sheetRecord) throw new Error("No record in sheets wire")
 	const columns = sheetRecord.getFieldValue(

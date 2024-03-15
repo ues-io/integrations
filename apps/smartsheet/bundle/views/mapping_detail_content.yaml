@@ -93,6 +93,8 @@ definition:
                             - field: uesio/core.type
                             - components:
                                 - uesio/smartsheet.mapper:
+                                    mappingWireName: mapping
+                                    sheetWireName: sheets
                               label: Column
                           uesio.id: fieldMappingTable
                           mode: READ
