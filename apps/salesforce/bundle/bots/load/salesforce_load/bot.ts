@@ -73,7 +73,23 @@ export default function salesforce_load(bot: LoadBotApi) {
 				// Ignore special fields
 				if (sfField === "attributes") return acc
 				const uesioName = uesioFieldsBySalesforceName[sfField]
-				if (!uesioName) return acc
+				if (!uesioName) {
+					// Special handling for sf reference fields
+					// example: Project__r.Name
+					if (typeof value === "object") {
+						acc = {
+							...acc,
+							...createUesioItemFromSalesforceRecord(
+								Object.fromEntries(
+									Object.entries(
+										value as Record<string, unknown>
+									).map(([k, v]) => [sfField + "." + k, v])
+								) as Record<string, FieldValue>
+							),
+						}
+					}
+					return acc
+				}
 				if (value !== null && value !== undefined) {
 					const fieldMetadata =
 						collectionMetadata.getFieldMetadata(uesioName)
