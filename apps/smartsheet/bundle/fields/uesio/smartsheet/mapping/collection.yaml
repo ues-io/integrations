@@ -2,5 +2,6 @@ name: collection
 label: Collection
 type: METADATA
 required: true
+createOnly: true
 metadata:
   type: COLLECTION
